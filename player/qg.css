@@ -1,0 +1,48 @@
+/* QG do Esquadrão Sentinela — página inicial com as missões */
+body.qg { overflow-x: hidden; background: radial-gradient(ellipse at 80% 0%, #17264d, var(--fundo) 60%) fixed; }
+.qg-topo { display: flex; justify-content: space-between; align-items: center; gap: 12px; max-width: 1180px; margin: 0 auto; padding: 18px 16px; }
+.qg-marca { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+.qg-status { font: 600 12px var(--mono); letter-spacing: .14em; color: var(--ouro); }
+main { max-width: 1180px; margin: 0 auto; padding: 0 16px; }
+
+.qg-hero { display: grid; grid-template-columns: 1.1fr .9fr; align-items: center; gap: 24px; min-height: 62vh; }
+.qg-hero h1 { margin: 12px 0; font-size: clamp(48px, 8vw, 96px); line-height: .92; letter-spacing: -.03em; }
+.qg-hero h1 span { color: var(--ouro); }
+.qg-lead { max-width: 520px; font-size: 18px; line-height: 1.55; color: #d7dfeb; }
+.qg-insignias { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 22px; }
+.qg-insignias small { color: var(--tinta-2); flex-basis: 100%; }
+.qg-insignia { width: 44px; height: 50px; display: grid; place-items: center; font-weight: 800; color: rgba(255,255,255,.35); background: rgba(255,255,255,.06); clip-path: polygon(50% 0, 100% 16%, 100% 60%, 50% 100%, 0 60%, 0 16%); }
+.qg-insignia.ok { background: var(--cor); color: #fff; filter: drop-shadow(0 0 12px var(--cor)); }
+.qg-hero-arte { position: relative; height: min(60vh, 520px); }
+.qg-hero-arte img { position: absolute; bottom: 0; height: 100%; filter: drop-shadow(0 20px 30px rgba(0,0,0,.5)); }
+.qg-isca { left: 0; height: 82% !important; opacity: .9; }
+.qg-lupa { right: 6%; }
+
+.qg-missoes h2 { font: 600 12px var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--tinta-2); margin: 24px 0 14px; }
+.qg-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; padding-bottom: 40px; }
+.qg-card { display: flex; flex-direction: column; border-radius: 18px; overflow: hidden; background: var(--painel); border: 1px solid var(--borda); color: inherit; text-decoration: none; transition: transform .25s, border-color .25s; }
+a.qg-card:hover { transform: translateY(-4px); border-color: var(--cor); }
+a.qg-card:focus-visible { outline: 3px solid var(--ouro); outline-offset: 3px; }
+.qg-card.feito { border-color: color-mix(in srgb, var(--cor) 60%, transparent); }
+.qg-card-arte { position: relative; height: 210px; display: flex; align-items: flex-end; justify-content: center; gap: 4px; background: radial-gradient(ellipse at 50% 100%, color-mix(in srgb, var(--cor) 35%, transparent), transparent 70%), #0b1222; overflow: hidden; }
+.qg-ator { height: 92%; display: flex; align-items: flex-end; position: relative; }
+.qg-ator img, .qg-ator svg { height: 100%; width: auto; }
+.qg-ator.vilao { height: 80%; }
+.qg-ator .arte-provisoria { display: none; }
+.qg-ator .camaleao-pele { height: 100%; }
+.qg-vs { align-self: center; font: 700 22px var(--mono); color: var(--ouro); }
+.qg-card-texto { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.qg-card-texto small { font: 600 10px var(--mono); letter-spacing: .16em; color: var(--tinta-2); }
+.qg-card-texto h3 { margin: 2px 0; font-size: 22px; }
+.qg-card-texto p { margin: 0; color: var(--tinta-2); line-height: 1.45; font-size: 14px; }
+.qg-card-texto .qg-duelo { color: var(--tinta); font-weight: 600; }
+.qg-card-status { margin-top: auto; padding-top: 12px; font-weight: 700; color: var(--ouro); font-size: 14px; }
+.qg-card.bonus { border-style: dashed; justify-content: center; min-height: 200px; opacity: .7; }
+.qg-card.bonus.liberado { opacity: 1; border-color: var(--ouro); }
+.qg-rodape { max-width: 1180px; margin: 0 auto; padding: 20px 16px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; color: var(--tinta-2); font-size: 13px; border-top: 1px solid var(--borda); }
+.qg-rodape a { color: var(--tinta-2); }
+
+@media (max-width: 760px) {
+  .qg-hero { grid-template-columns: 1fr; min-height: 0; padding: 12px 0; }
+  .qg-hero-arte { height: 260px; order: -1; }
+}

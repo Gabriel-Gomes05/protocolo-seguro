@@ -1,14 +1,60 @@
-# Protocolo Seguro
+# Esquadrão Sentinela
 
-Landing page interativa em português sobre phishing, senhas, engenharia social e ransomware.
+Série de treinamentos interativos de segurança da informação, em português, com heróis, vilões e decisões que o próprio colaborador toma. Cada módulo dura de 6 a 8 minutos e termina com um quiz registrado no LMS.
 
-Abra `index.html` em um navegador para iniciar. O projeto não precisa de build nem instalação. As fontes personalizadas carregam do Google Fonts; se estiver offline, o navegador usa fontes alternativas.
+Abra `index.html` (o QG) em um navegador. Não precisa de build nem de instalação.
 
-## Um Clique — o curta interativo
+## Módulos
 
-O botão **▶ Assistir à experiência** abre um curta de cerca de 3 minutos, em tela cheia, em 10 cenas: a cidade, o vilão, phishing, o mundo digital, a rede, engenharia social, o vilão perde, ransomware, a virada e o final. Em cinco momentos o espectador decide o que o Gabriel faz; cada escolha muda a cena seguinte e soma pontos ao **Cyber Score** (0–100). No fim, o botão **Faça o teste de cybersegurança** leva à simulação em capítulos.
+| # | Módulo | Herói × vilão | Tema | Arquivo |
+|---|--------|---------------|------|---------|
+| 1 | A Isca | Lupa × Isca | Phishing por e-mail, SMS e WhatsApp; reportar | `modulo-1-isca.html` |
+| 2 | A Força Bruta | Trava × Força Bruta | Frase-senha, não reutilizar, gerenciador, segundo fator | `modulo-2-forca-bruta.html` |
+| 3 | O Vazamento | Íris × Vazamento | LGPD no dia a dia | `modulo-3-vazamento.html` |
+| 4 | O Camaleão | Eco × Camaleão | Engenharia social | `modulo-4-camaleao.html` |
+| 5 | Esquadrão Reunido (bônus) | Todos | Revisão e certificado | ainda não produzido |
 
-- `film.js` — motor de cenas (cenários desenhados em canvas, som sintetizado com Web Audio, narração com a voz pt-BR do navegador quando houver) e o roteiro.
-- `film.css` — barras de cinema, legendas, decisões e interfaces (e-mail, celular, terminal).
+O roteiro do módulo 1 segue a bíblia do projeto (versão de 5/10/2026). Os módulos 2 a 4 são rascunhos na mesma estrutura e precisam de revisão de roteiro.
 
-Controles: `Espaço` pausa, `M` liga/desliga o som, `A`/`B`/`C` ou `1`/`2`/`3` respondem às decisões e `Esc` fecha.
+Todo módulo segue a estrutura padrão: abertura, decisão ramificada, lição do herói, desafio interativo, virada com decisão rápida (10 s), "e se eu errar?", desfecho com insígnia e quiz de 5 perguntas (aprovação com 4).
+
+## Estrutura
+
+```
+index.html                 QG: lista de missões e insígnias conquistadas
+modulo-N-*.html            uma página por módulo (é o que vai para o LMS)
+config.js                  white label: empresa, domínio, cor, logo, canal de reporte
+modulos/NN-*.js            roteiro de cada módulo (falas, decisões, desafio, quiz)
+player/player.js           motor: cenas, legendas, vozes, decisões, desafios, quiz, resultado
+player/elenco.js           personagens e cenários provisórios
+player/scorm.js            ponte SCORM 1.2 (não faz nada fora de um LMS)
+player/player.css, qg.css  visual
+assets/personagens/        sprites recortados das folhas aprovadas (Lupa e Isca)
+assets/referencia/         folhas de modelo originais
+scorm/empacotar.ps1        gera um .zip SCORM 1.2 por módulo em dist/
+legado/                    versão anterior ("Um Clique")
+```
+
+## White label
+
+Tudo o que identifica o cliente fica em `config.js` e entra pelo player, nunca pela arte ou pelo áudio. `[EMPRESA]`, `[empresa]` e `[domínio oficial]` nos roteiros são trocados automaticamente.
+
+Para demonstrações, dá para trocar pela URL, sem mexer no arquivo: `index.html?empresa=Acme&dominio=acme.com.br&cor=%23c0392b`.
+
+## Arte, vozes e cenários
+
+- **Personagens:** Lupa e Isca usam as folhas aprovadas. Trava, Íris, Eco, Força Bruta, Vazamento e Camaleão aparecem como figuras provisórias (marcadas "arte provisória") até as folhas deles serem geradas. Para trocar, salve as poses em `assets/personagens/<id>-<pose>.webp` e marque o personagem com `arte: true` em `player/elenco.js`.
+- **Cenários:** são desenhados em CSS. Para usar a arte aprovada, aponte em `config.js → cenarios` (ex.: `escritorio: 'assets/cenarios/escritorio.jpg'`).
+- **Vozes:** sem gravações, o player usa a voz pt-BR do navegador. Para usar as gravações do ElevenLabs, abra `modulo-1-isca.html?roteiro`, que lista cada fala com seu id (f001, f002…). Salve cada áudio como `<id>.mp3` numa pasta e aponte essa pasta em `config.js → vozes` (ex.: `isca: 'assets/vozes/isca/'`).
+
+## SCORM / LMS
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scorm\empacotar.ps1
+```
+
+Gera `dist/sentinela-<módulo>-scorm12.zip`. No fim do quiz o player envia ao LMS a nota (0 a 100), o status (`passed` ou `failed`) e o tempo de sessão. Ajuste `config.js` para o cliente antes de empacotar.
+
+## Controles
+
+`Espaço` pausa · `Enter` ou clique avança a fala · `A`/`B`/`C` respondem · `M` liga/desliga efeitos · `V` liga/desliga narração.

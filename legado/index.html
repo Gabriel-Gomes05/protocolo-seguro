@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080c16">
+  <meta name="description" content="Uma simulação interativa de segurança digital. Você consegue escapar do golpe?">
+  <title>Um Clique — Protocolo Seguro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="characters.css">
+  <link rel="stylesheet" href="film.css">
+  <script src="script.js" defer></script>
+  <script src="film.js" defer></script>
+</head>
+<body>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="#inicio" aria-label="Protocolo Seguro, início"><span class="brand-mark">P<span>·</span></span><span>PROTOCOLO<br><b>SEGURO</b></span></a>
+    <div class="top-status"><span class="status-dot"></span> SIMULAÇÃO INTERATIVA <span class="status-divider">/</span> <span id="header-step">CAPÍTULO 00</span></div>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo <span>↘</span></a>
+  </header>
+  <main id="conteudo">
+    <section class="screen hero active" id="inicio" data-screen="0">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="eyebrow-line"></span> UM CURTA INTERATIVO DE CYBERSEGURANÇA</p>
+        <h1>Um<br><span>clique.</span></h1>
+        <p class="hero-desc">Uma empresa, um atacante e cinco decisões. O final depende de você.</p>
+        <div class="hero-actions"><button class="primary-button" type="button" data-film>▶&nbsp; Assistir à experiência <span>↗</span></button><button class="secondary-button" type="button" data-go="1">Ir direto ao teste <span>→</span></button></div>
+        <p class="microcopy"><span>◷</span> 3 MINUTOS <i>·</i> 10 CENAS <i>·</i> COM SOM</p>
+      </div>
+      <div class="hero-art" aria-label="Ilustração de uma estação de trabalho em alerta">
+        <div class="art-grid"></div><div class="art-orbit orbit-a"></div><div class="art-orbit orbit-b"></div>
+        <div class="window-card back-window"><div class="window-head"><i></i><i></i><i></i><span>monitoramento.exe</span></div><div class="monitor-lines"><b></b><b></b><b></b><b></b></div></div>
+        <div class="window-card mail-window"><div class="window-head"><i></i><i></i><i></i><span>caixa de entrada <em>1 novo</em></span></div><div class="mail-alert"><span class="mail-icon">✉</span><div><b>Pagamento pendente</b><small>financeiro@empresa-seguranca.com</small></div><span class="alert-mark">!</span></div><div class="mail-skeleton"></div><div class="mail-skeleton short"></div></div>
+        <div class="employee" aria-label="Funcionária trabalhando na estação"><div class="employee-head"><span class="employee-hair"></span><span class="employee-eye"></span></div><div class="employee-body"><span></span></div></div>
+        <div class="figure"><div class="figure-head"><div class="figure-hair"></div><div class="figure-face"><span class="eye"></span><span class="eye"></span></div><div class="figure-hood"></div></div><div class="figure-body"><span class="figure-seam"></span><span class="figure-badge">?</span></div></div>
+        <div class="float-tag tag-threat"><span class="status-dot red"></span> ATIVIDADE SUSPEITA</div><div class="float-tag tag-encrypted">◈ &nbsp; CONEXÃO PROTEGIDA</div>
+        <div class="art-caption"><span>FIG. 01</span> UMA MANHÃ COMO QUALQUER OUTRA</div>
+      </div>
+      <div class="hero-bottom"><span>01 — 04</span><span>ROLE PARA EXPLORAR <b>↓</b></span><span>AMBIENTE CONTROLADO</span></div>
+    </section>
+
+    <section class="screen intro" data-screen="1">
+      <div class="chapter-label"><span>CAPÍTULO 01</span><span>O PONTO DE ENTRADA</span></div>
+      <div class="intro-content"><div class="intro-copy"><p class="eyebrow">ELE NÃO PRECISA INVADIR</p><h2>“Só preciso convencer alguém a <span>abrir a porta.</span>”</h2><p>A maioria dos golpes não começa com um computador sendo invadido. Começa com uma mensagem que parece confiável, uma senha reaproveitada, um pedido urgente.</p><p>Conheça PHISH. Ele é bom em parecer alguém que não é.</p><button class="text-button" data-go="2">Ver primeira tentativa <span>→</span></button></div><div class="villain-card"><div class="villain-scan"></div><div class="villain-avatar"><div class="avatar-hood"><div class="avatar-face"><span></span><span></span><b></b></div></div><span class="avatar-glitch">PH</span></div><div class="villain-meta"><span>AMEAÇA IDENTIFICADA / 001</span><h3>PHISH</h3><p>ESPECIALISTA EM ENGANAR PESSOAS</p></div><div class="villain-stamp">NÃO<br>CONFIÁVEL</div></div></div>
+      <div class="chapter-foot"><span>AMEAÇA 01 / PHISHING</span><span>SEU JULGAMENTO CONTA <b>↗</b></span></div>
+    </section>
+
+    <section class="screen decision" data-screen="2">
+      <div class="chapter-label"><span>CAPÍTULO 02</span><span>AMEAÇA 01 / PHISHING</span></div>
+      <div class="decision-layout"><div class="decision-copy"><p class="eyebrow"><span class="pulse-dot"></span> NOVA MENSAGEM RECEBIDA</p><h2>Uma mensagem.<br>Um pouco de <span>pressa.</span></h2><p>Você recebe este e-mail enquanto termina uma tarefa importante. O que faz?</p><div class="hint">DICA DE PHISH <span>→</span> Desconfie de urgência e confira o endereço completo do remetente.</div></div>
+        <div class="email-card"><div class="email-top"><span>CAIXA DE ENTRADA <i>●</i></span><span>AGORA · 09:41</span></div><div class="email-from"><div class="sender-avatar">F</div><div><b>Financeiro · Empresa</b><small>financeiro@empresa-seguranca.com</small></div><span class="mail-three">•••</span></div><div class="email-subject"><small>ASSUNTO</small><h3>⚠ Pagamento pendente — ação necessária</h3></div><div class="email-body"><p>Olá, identificamos uma inconsistência em seu cadastro. Para evitar a suspensão do acesso, regularize seus dados imediatamente.</p><button class="fake-link" tabindex="-1">REGULARIZAR AGORA &nbsp; ↗</button><small>Esta mensagem foi enviada automaticamente. Não responda a este e-mail.</small></div><div class="email-options"><p>O QUE VOCÊ FARIA?</p><button class="choice" data-correct="false"><span class="choice-key">A</span><span>Clicaria no link para resolver logo</span><span class="choice-arrow">↗</span></button><button class="choice" data-correct="true"><span class="choice-key">B</span><span>Verificaria o remetente por outro canal</span><span class="choice-arrow">↗</span></button><button class="choice" data-correct="true"><span class="choice-key">C</span><span>Acessaria o sistema oficial diretamente</span><span class="choice-arrow">↗</span></button><div class="feedback" aria-live="polite"></div></div></div></div>
+      <div class="chapter-foot"><span>02 / 04 <span class="progress"><i></i></span></span><span>ESCOLHA COM CALMA</span></div>
+    </section>
+
+    <section class="screen password" data-screen="3">
+      <div class="chapter-label"><span>CAPÍTULO 03</span><span>AMEAÇA 02 / SENHAS</span></div>
+      <div class="password-layout"><div class="password-copy"><p class="eyebrow">UMA SENHA, VÁRIAS PORTAS</p><h2>Um vazamento pequeno.<br>Um problema <span>grande.</span></h2><p>PHISH tenta a senha exposta em outros lugares. Uma senha repetida pode conectar o e-mail, a VPN e os sistemas internos.</p><div class="credential-flow"><div class="flow-node breached"><span>!</span><div><b>SENHA VAZADA</b><small>um serviço foi comprometido</small></div></div><div class="flow-line"></div><div class="flow-node"><span>01</span><div><b>E-MAIL</b><small>acesso em risco</small></div></div><div class="flow-line"></div><div class="flow-node"><span>02</span><div><b>VPN / SISTEMA INTERNO</b><small>acesso em risco</small></div></div><div class="flow-line"></div><div class="flow-node blocked-node"><span>✓</span><div><b>ACESSO BLOQUEADO</b><small>senha única + MFA</small></div></div></div></div><div class="quiz-card"><span class="quiz-count">DECISÃO 02 <i>·</i> ESCOLHA UMA</span><h3>Qual prática protege melhor suas contas?</h3><div class="answers"><button class="answer" data-correct="false"><span>01</span> Usar a mesma senha em todos os sistemas <b>×</b></button><button class="answer" data-correct="false"><span>02</span> Anotar a senha em um papel <b>×</b></button><button class="answer" data-correct="true"><span>03</span> Usar senhas únicas com um gerenciador <b>↗</b></button><button class="answer" data-correct="false"><span>04</span> Compartilhar a senha com colegas <b>×</b></button></div><div class="feedback" aria-live="polite"></div><button class="text-button next-hidden" data-go="4">Continuar <span>→</span></button></div></div>
+      <div class="chapter-foot"><span>CAMADA 01 <b class="green-text">●</b> SENHAS ÚNICAS</span><span>CAMADA 02 <b class="green-text">●</b> MFA</span></div>
+    </section>
+
+    <section class="screen social" data-screen="4">
+      <div class="chapter-label"><span>CAPÍTULO 04</span><span>AMEAÇA 03 / ENGENHARIA SOCIAL</span></div>
+      <div class="social-layout"><div class="social-copy"><p class="eyebrow">OUTRO CANAL. MESMA PRESSÃO.</p><h2>Quando a urgência<br>vem de alguém que <span>manda.</span></h2><p>Uma mensagem chega no chat de trabalho. A foto e o nome parecem certos, mas contas podem ser falsificadas ou comprometidas.</p><div class="pressure-tags"><span>01 / AUTORIDADE</span><span>02 / URGÊNCIA</span><span>03 / PRESSÃO</span></div></div><div class="chat-card"><div class="chat-top"><div class="chat-avatar">D</div><div><b>Diretor</b><small><i></i> disponível</small></div><span class="chat-more">•••</span></div><div class="chat-date">HOJE, 10:16</div><div class="bubble incoming">Oi! Estou entrando numa reunião agora. Preciso que você compre alguns cartões-presente para um cliente. Consegue fazer rápido?</div><div class="bubble incoming">É urgente — depois te explico. Me manda os códigos por aqui, por favor.</div><div class="chat-time">10:17 ✓✓</div><div class="chat-question">O QUE VOCÊ FAZ?</div><div class="chat-choices"><button class="chat-choice" data-correct="false"><span>A</span>Faço imediatamente para ajudar.</button><button class="chat-choice" data-correct="true"><span>B</span>Confirmo por uma ligação ou canal conhecido.</button><button class="chat-choice" data-correct="false"><span>C</span>Envio os códigos na conversa.</button></div><div class="feedback" aria-live="polite"></div></div></div>
+      <div class="chapter-foot"><span>REGRA DE OURO</span><span>CONFIRME POR OUTRO CANAL <b>↗</b></span></div>
+    </section>
+
+    <section class="screen ransomware" data-screen="5">
+      <div class="chapter-label"><span>CAPÍTULO 05</span><span>AMEAÇA 04 / RANSOMWARE</span></div>
+      <div class="ransom-layout"><div class="ransom-copy"><p class="eyebrow"><span class="pulse-dot red"></span> ANEXO SUSPEITO DETECTADO</p><h2>O arquivo que<br>não devia <span>abrir.</span></h2><p>Uma nota fiscal chega como arquivo executável. Parece rotineiro. Por dentro, começa a criptografar os dados.</p><div class="file-card"><span class="file-icon">EXE</span><span><b>NOTA_FISCAL_2026.exe</b><small>Arquivo executável · 2,4 MB</small></span><span class="file-danger">!</span></div><button class="primary-button danger-button" id="open-file">Abrir arquivo <span>↗</span></button><div class="safe-choice"><button class="text-button" id="report-file">Reportar arquivo suspeito <span>→</span></button></div></div><div class="ransom-monitor"><div class="monitor-top"><span><i></i> PROTEÇÃO DE ENDPOINT</span><span>● AO VIVO</span></div><div class="monitor-screen"><div class="monitor-lock">⌑</div><p class="encrypt-label">STATUS DA REDE <span id="encrypt-status">MONITORANDO</span></p><div class="encrypt-track"><i id="encrypt-bar"></i></div><div class="encrypt-files"><span>DOCUMENTOS</span><span>FOTOS</span><span>CONTRATOS</span><span>BASE DE DADOS</span></div><div class="encrypt-message" id="encrypt-message">Nenhuma ameaça ativa detectada.</div><div class="monitor-foot"><span>EDR / ENDPOINT-04</span><span id="encrypt-percent">SISTEMA ÍNTEGRO</span></div></div><div class="monitor-base"></div><p class="feedback monitor-feedback" id="ransom-feedback" aria-live="polite"></p></div></div>
+      <div class="chapter-foot"><span>CAMADAS DE DEFESA</span><span>ATUALIZAÇÕES · BACKUPS · EDR · MENOR PRIVILÉGIO</span></div>
+    </section>
+
+    <section class="screen reveal" data-screen="6">
+      <div class="chapter-label"><span>RECAPITULAÇÃO</span><span>A VIRADA</span></div><div class="reveal-content"><p class="eyebrow">PERCEBEU ALGUMA COISA?</p><h2>PHISH não começou<br>invadindo <span>servidores.</span></h2><p>Ele tentou entrar através de um e-mail, uma senha, uma conversa e um arquivo.</p><div class="entry-list"><span>✉ &nbsp; E-MAIL</span><span>⌑ &nbsp; SENHA</span><span>▣ &nbsp; CONVERSA</span><span>▧ &nbsp; ARQUIVO</span></div><div class="reveal-statement">CYBERSEGURANÇA<br><span>É COMPORTAMENTO.</span></div></div><div class="layer-visual"><div class="layer-ring ring-1"></div><div class="layer-ring ring-2"></div><div class="layer-ring ring-3"></div><div class="layer-core">VOCÊ<br><b>●</b></div><span class="layer-tag t1">MFA / ATIVO</span><span class="layer-tag t2">BACKUP / OK</span><span class="layer-tag t3">EDR / ONLINE</span><span class="layer-tag t4">SENHA ÚNICA / OK</span><div class="blocked-stamp">ATAQUE<br>BLOQUEADO</div></div><div class="chapter-foot"><span>DEFESA EM CAMADAS</span><span>O HÁBITO CERTO MUDA O FINAL <b>↗</b></span></div>
+    </section>
+
+    <section class="screen final-quiz" data-screen="7">
+      <div class="chapter-label"><span>DESAFIO FINAL</span><span>TESTE SEU NÍVEL DE SEGURANÇA</span></div><div class="final-layout"><div class="final-copy"><p class="eyebrow">05 DECISÕES RÁPIDAS</p><h2>Seu radar de golpes<br>está <span>calibrado?</span></h2><p>Responda cinco situações do dia a dia para descobrir como está sua atenção digital.</p><div class="quiz-progress"><span id="quiz-index">PERGUNTA 01 / 05</span><div><i id="quiz-progress-bar"></i></div></div></div><div class="final-question-card"><div class="question-top"><span>SIMULAÇÃO / <b id="question-topic">PHISHING</b></span><span id="question-counter">01—05</span></div><h3 id="question-text">Você recebe um e-mail pedindo que informe sua senha para evitar o bloqueio da conta. O que faz?</h3><div id="final-answers" class="final-answers"></div><div class="feedback" id="final-feedback" aria-live="polite"></div><div class="result-panel" id="result-panel" hidden></div></div></div><div class="chapter-foot"><span>SEU PROGRESSO FICA NESTA PÁGINA</span><span>APRENDER É A MELHOR DEFESA</span></div>
+    </section>
+
+    <section class="screen ending" data-screen="8">
+      <div class="ending-content"><div class="ending-villain"><div class="mini-hood"><div class="mini-face"><span></span><span></span></div></div><span>PHISH / CONEXÃO PERDIDA</span></div><p class="eyebrow">SIMULAÇÃO CONCLUÍDA</p><h2>“Você aprendeu<br><span>rápido demais...</span>”</h2><div class="ending-rule"></div><p class="ending-warning">O PRÓXIMO ATAQUE PODE COMEÇAR AMANHÃ.</p><p class="ending-sub">Agora você sabe o que observar. Compartilhe esse conhecimento com sua equipe.</p><div class="ending-actions"><button class="primary-button" id="restart">Fazer o teste novamente <span>↻</span></button><button class="secondary-button" type="button" data-film>Assistir ao curta “Um Clique” <span>▶</span></button><a class="secondary-button" href="mailto:?subject=Vamos%20fortalecer%20a%20seguran%C3%A7a%20digital&body=Que%20tal%20conversarmos%20sobre%20como%20proteger%20nossa%20empresa%3F">Quero proteger minha empresa <span>↗</span></a></div><p class="end-note">PROTOCOLO SEGURO <i>·</i> CONHECIMENTO É SUA PRIMEIRA LINHA DE DEFESA.</p></div><div class="end-graphic"><div class="end-ring er-one"></div><div class="end-ring er-two"></div><span class="end-cross">+</span><span class="end-scan">SINAL ENCERRADO <b>✓</b></span></div>
+    </section>
+  </main>
+  <nav class="side-nav" aria-label="Navegação da simulação"><span class="nav-label">SUA JORNADA</span><button data-go="0" aria-label="Início" class="nav-dot selected"></button><button data-go="1" aria-label="Introdução" class="nav-dot"></button><button data-go="2" aria-label="Phishing" class="nav-dot"></button><button data-go="3" aria-label="Senhas" class="nav-dot"></button><button data-go="4" aria-label="Engenharia social" class="nav-dot"></button><button data-go="5" aria-label="Ransomware" class="nav-dot"></button><button data-go="6" aria-label="Recapitulação" class="nav-dot"></button><button data-go="7" aria-label="Quiz final" class="nav-dot"></button><button data-go="8" aria-label="Final" class="nav-dot"></button><span class="nav-count"><b id="nav-current">01</b> / 09</span></nav>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="film" id="film" role="dialog" aria-modal="true" aria-label="Um Clique — curta interativo" hidden>
+    <canvas class="film-canvas" id="film-canvas" aria-hidden="true"></canvas>
+    <div class="film-stage" id="film-stage"></div>
+    <div class="film-grain" aria-hidden="true"></div>
+    <div class="film-vignette" aria-hidden="true"></div>
+    <div class="film-flash" id="film-flash" aria-hidden="true"></div>
+    <div class="film-subtitle" id="film-subtitle" aria-live="polite"><span class="film-speaker"></span><p></p></div>
+    <div class="film-choice" id="film-choice" hidden></div>
+    <div class="film-bar film-bar-top" aria-hidden="true"></div>
+    <div class="film-bar film-bar-bottom" aria-hidden="true"></div>
+    <div class="film-top">
+      <div class="film-slate" id="film-slate"><span id="film-scene-no">CENA 01</span><b id="film-scene-name">A CIDADE</b></div>
+      <div class="film-score" id="film-score">CYBER SCORE <b>0</b></div>
+      <div class="film-controls">
+        <button type="button" class="film-btn" id="film-pause" aria-label="Pausar">❚❚<span> PAUSAR</span></button>
+        <button type="button" class="film-btn" id="film-sound" aria-pressed="true" aria-label="Som">♪<span> SOM</span></button>
+        <button type="button" class="film-btn" id="film-voice" aria-pressed="true" aria-label="Narração por voz">◉<span> VOZ</span></button>
+        <button type="button" class="film-btn" id="film-skip">PULAR<span> CENA</span> →</button>
+        <button type="button" class="film-btn" id="film-close" aria-label="Fechar o curta">✕</button>
+      </div>
+    </div>
+    <div class="film-bottom"><span class="film-brand">UM CLIQUE <b>·</b> PROTOCOLO SEGURO</span><div class="film-progress"><i id="film-progress-bar"></i></div><span class="film-count" id="film-scene-count">01 / 10</span></div>
+    <div class="film-paused" aria-hidden="true">PAUSADO</div>
+  </div>
+</body>
+</html>
