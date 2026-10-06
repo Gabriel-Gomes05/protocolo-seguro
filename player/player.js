@@ -32,6 +32,8 @@
   const paragrafos = s => String(s || '').split('\n').filter(Boolean).map(p => `<p>${marcar(p)}</p>`).join('');
   const $ = (sel, root = document) => root.querySelector(sel);
   const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+  // ordem aleatória das opções, para a resposta certa não cair sempre na mesma letra
+  const embaralhar = n => { const a = [...Array(n).keys()]; for (let i = n - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const logoHTML = () => CFG.logo ? `<img src="${esc(CFG.logo)}" alt="">` : `<span>${esc(CFG.empresa[0])}</span>`;
 
   // ---------- relógio (pausa congela tudo) ----------
@@ -264,6 +266,7 @@
       e.style.setProperty('--escala', a.escala || 1);
       e.classList.toggle('espelhado', !!a.espelhar);
       const nasceu = !e.dataset.pose;
+      e.dataset.base = a.pose || 'frente';
       definirPose(e, a.id, a.pose);
       if (nasceu) gesto(e, 'chegada');
     });
@@ -301,6 +304,7 @@
     vilao: ['tramando', 'gargalhada', 'ameaca', 'desdem', 'falando']
   };
   function gestoDaFala(e, f) {
+    if (f.gesto) return f.gesto;
     if (f.rosto) return f.rosto;
     const lista = GESTOS[e.classList.contains('vilao') ? 'vilao' : 'heroi'].filter(g => g !== e._gesto);
     return lista[Math.floor(Math.random() * lista.length)];
@@ -382,6 +386,8 @@
     recolherLente();
     ui.tela.querySelectorAll('.tela:not(.saindo)').forEach(antiga => { antiga.classList.add('saindo'); setTimeout(() => antiga.remove(), 350); });
     ui.palco.classList.toggle('foco', !!(spec && spec.foco));
+    // na Central, telão e canal ocupam o lugar do telão desenhado no cenário (sem moldura dupla)
+    ui.palco.classList.toggle('tela-no-telao', !!(spec && ['telao', 'canal'].includes(spec.tipo)));
     if (!spec) return;
     const caixa = el('div', `tela tela-${spec.tipo} ${spec.posicao ? 'pos-' + spec.posicao : ''} ${spec.foco ? 'foco' : ''}`, TELAS[spec.tipo](spec));
     ui.tela.appendChild(caixa);
@@ -450,13 +456,16 @@
   async function fala(f) {
     legenda(f.quem, f.texto, f);
     const ator = ui.atores.querySelector(`[data-ator="${f.quem}"]`);
-    if (ator && f.pose) definirPose(ator, f.quem, f.pose);
+    if (ator && f.pose) ator.dataset.base = f.pose;
     const g = ator ? gestoDaFala(ator, f) : null;
     const p = ELENCO[f.quem] || {};
-    const poseAntes = ator && ator.dataset.pose;
-    const base = ator && !f.pose && (p.gestos || {})[g];
-    const poseGesto = base && [`${base}-${poseAntes}`, base].find(n => (p.poses || []).includes(n));
-    if (poseGesto) definirPose(ator, f.quem, poseGesto);
+    const tem = n => (p.poses || []).includes(n);
+    const base = ator && ator.dataset.base;
+    // pose de gesto desenhada (ex.: examinando), senão a expressão no corpo (ex.: frente-sorriso), senão a pose da cena
+    const gestoPose = ator && !f.pose && (p.gestos || {})[g];
+    const poseGesto = gestoPose && [`${gestoPose}-${base}`, gestoPose].find(tem);
+    const poseRosto = f.rosto && tem(`${base}-${f.rosto}`) ? `${base}-${f.rosto}` : null;
+    if (ator) definirPose(ator, f.quem, poseGesto || poseRosto || base);
     if (ator) gesto(ator, g);
     escutar(ator);
     ui.atores.querySelectorAll('.ator').forEach(a => a.classList.toggle('falando', a === ator));
@@ -469,11 +478,12 @@
     }
     Voz.cancelar();
     if (ator) ator.classList.remove('falando');
-    if (ator && ator.dataset.pose !== poseAntes && ator.dataset.pose === poseGesto) definirPose(ator, f.quem, poseAntes);
+    if (poseGesto && ator.dataset.pose === poseGesto) definirPose(ator, f.quem, base);
   }
 
   // ---------- selos, efeitos e insígnia ----------
   function selo(nome) {
+    if (estado.semSelo) return;
     if (!estado.selos.includes(nome)) estado.selos.push(nome);
     ui.selos.textContent = `★ ${estado.selos.length}`;
     ui.toast.innerHTML = `<span class="selo-icone">★</span><div><small>SELO CONQUISTADO</small><b>${esc(nome)}</b></div>`;
@@ -536,10 +546,11 @@
   async function decisao(d) {
     Voz.cancelar();
     const letras = ['A', 'B', 'C', 'D'];
+    const ordem = d.ordemFixa ? [...d.opcoes.keys()] : embaralhar(d.opcoes.length);
     const c = abrirCamada('decisao-camada', `<div class="decisao ${d.tempo ? 'rapida' : ''}">
         <p class="decisao-rotulo">${d.tempo ? 'DECIDA RÁPIDO' : 'SUA DECISÃO'}</p><h2>${marcar(d.pergunta)}</h2>
         ${d.tempo ? '<div class="cronometro"><i></i><span></span></div>' : ''}
-        <div class="opcoes">${d.opcoes.map((o, i) => `<button type="button" class="opcao" data-opcao="${i}"><span class="tecla">${letras[i]}</span><span>${marcar(o.texto)}</span></button>`).join('')}</div></div>`);
+        <div class="opcoes">${ordem.map((k, i) => `<button type="button" class="opcao" data-opcao="${k}"><span class="tecla">${letras[i]}</span><span>${marcar(d.opcoes[k].texto)}</span></button>`).join('')}</div></div>`);
     Som.notificacao();
     const escolha = await new Promise(resolve => {
       let feito = false;
@@ -562,13 +573,16 @@
       }
     });
     const o = d.opcoes[escolha.i];
-    c.querySelectorAll('[data-opcao]').forEach((b, i) => { b.disabled = true; b.classList.toggle('escolhida', i === escolha.i); });
+    c.querySelectorAll('[data-opcao]').forEach(b => { b.disabled = true; b.classList.toggle('escolhida', Number(b.dataset.opcao) === escolha.i); });
     if (escolha.porTempo) $('.decisao-rotulo', c).textContent = 'O TEMPO ACABOU';
     estado.escolhas.push({ pergunta: txt(d.pergunta), resposta: txt(o.texto).replace(/\{\{|\}\}|\|\w+/g, ''), boa: !!o.boa, porTempo: escolha.porTempo });
     await esperar(escolha.porTempo ? 1200 : 650);
     fecharCamada();
+    // tempo esgotado não ganha selo: a história segue, mas o mérito não foi seu
+    estado.semSelo = escolha.porTempo;
     if (o.selo) selo(o.selo);
     await rodar(o.passos || []);
+    estado.semSelo = false;
   }
 
   // Desafio "pistas": clicar nos sinais escondidos numa mensagem.
@@ -648,9 +662,14 @@
     if (p.destacar != null) destacar(p);
     if (p.revelar) { ui.tela.querySelectorAll('.t-telao li').forEach((li, i) => li.classList.toggle('on', i < p.revelar)); Som.clique(); }
     if (p.efeito) await efeito(p.efeito);
-    if (p.selo) selo(p.selo);
+    if (p.selo && !estado.semSelo) selo(p.selo);
     if (p.decisao) await decisao(p.decisao);
-    if (p.desafio) await (p.desafio.tipo === 'classificar' ? desafioClassificar(p.desafio) : desafioPistas(p.desafio));
+    if (p.desafio) {
+      // cenário escurecido atrás do desafio, para o painel não brigar com o fundo
+      ui.palco.classList.add('foco');
+      await (p.desafio.tipo === 'classificar' ? desafioClassificar(p.desafio) : desafioPistas(p.desafio));
+      ui.palco.classList.remove('foco');
+    }
     if (p.insignia) await insignia();
     if (p.pausa) await esperar(p.pausa);
     if (p.legenda === false) ui.legenda.hidden = true;
@@ -694,21 +713,23 @@
 
   async function quiz() {
     cena('central'); atores([]); tela(null);
+    ui.palco.classList.add('foco');
     ui.trecho.textContent = 'Quiz final';
     ui.progresso.style.transform = 'scaleX(1)';
     let acertos = 0;
     const h = ELENCO[M.heroi];
     for (let i = 0; i < M.quiz.length; i++) {
       const q = M.quiz[i];
+      const ordem = q.ordemFixa ? [...q.opcoes.keys()] : embaralhar(q.opcoes.length);
       const c = abrirCamada('quiz-camada', `<div class="quiz">
           <div class="quiz-topo"><span>QUIZ FINAL · PERGUNTA ${i + 1} DE ${M.quiz.length}</span><span class="quiz-pontos">${'●'.repeat(i)}${'○'.repeat(M.quiz.length - i)}</span></div>
           <h2>${marcar(q.pergunta)}</h2>
-          <div class="opcoes">${q.opcoes.map((o, j) => `<button type="button" class="opcao" data-opcao="${j}"><span class="tecla">${'abc'[j]}</span><span>${marcar(o)}</span></button>`).join('')}</div>
+          <div class="opcoes">${ordem.map((k, j) => `<button type="button" class="opcao" data-opcao="${k}"><span class="tecla">${'abcd'[j]}</span><span>${marcar(q.opcoes[k])}</span></button>`).join('')}</div>
           <div class="quiz-explica" hidden><div class="legenda-rosto">${rostoDe(M.heroi, 'sorriso')}</div><div><b></b><p></p></div><button type="button" class="botao-principal" id="proxima">${i + 1 < M.quiz.length ? 'Próxima pergunta →' : 'Ver resultado →'}</button></div></div>`);
       const j = await new Promise(r => c.querySelectorAll('[data-opcao]').forEach(b => { b.onclick = () => r(Number(b.dataset.opcao)); }));
       const ok = j === q.certa;
       if (ok) { acertos++; Som.acerto(); } else Som.erro();
-      c.querySelectorAll('[data-opcao]').forEach((b, k) => { b.disabled = true; if (k === q.certa) b.classList.add('certa'); else if (k === j) b.classList.add('errada'); });
+      c.querySelectorAll('[data-opcao]').forEach(b => { const k = Number(b.dataset.opcao); b.disabled = true; if (k === q.certa) b.classList.add('certa'); else if (k === j) b.classList.add('errada'); });
       const ex = $('.quiz-explica', c);
       ex.hidden = false;
       if (M.heroi === 'lupa') $('.legenda-rosto', ex).innerHTML = rostoDe('lupa', ok ? 'feliz' : 'preocupada');
@@ -752,7 +773,7 @@
         </div></div>`);
     const refazer = $('#refazer', c);
     if (refazer) refazer.onclick = async () => resultado(await quiz());
-    $('#rever', c).onclick = () => location.reload();
+    $('#rever', c).onclick = () => { fecharCamada(); jogar(); };
   }
 
   // Lista todas as falas com seus ids (para gravar as vozes).
@@ -768,21 +789,30 @@
   }
 
   // ---------- ponto de entrada ----------
+  let ROTEIRO = [];
+  async function jogar() {
+    Object.assign(estado, { selos: [], escolhas: [], desafios: 0, semSelo: false, inicio: Date.now() });
+    ui.selos.textContent = '★ 0';
+    ui.progresso.style.transform = 'scaleX(0)';
+    tela(null);
+    await abertura();
+    await rodar(ROTEIRO);
+    ui.legenda.hidden = true;
+    await resultado(await quiz());
+  }
+
   window.Sentinela = {
     config: CFG, txt,
     async modulo(def) {
       M = def;
-      const roteiro = preparar(def.roteiro, { n: 0 });
+      const roteiro = ROTEIRO = preparar(def.roteiro, { n: 0 });
       marcos(roteiro);
       document.title = `${def.titulo} — Esquadrão Sentinela`;
       if (params.has('roteiro')) return mostrarRoteiro(roteiro);
       SCORM.iniciar();
       Voz.init(def.id);
       montar();
-      await abertura();
-      await rodar(roteiro);
-      ui.legenda.hidden = true;
-      await resultado(await quiz());
+      await jogar();
     }
   };
 })();

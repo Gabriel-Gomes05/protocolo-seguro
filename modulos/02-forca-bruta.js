@@ -24,7 +24,8 @@
       ['forca', 'Eu não adivinho. Eu testo. Milhões de tentativas, sem cansar.'],
       { cena: 'escritorio', atores: [{ id: 'trava', lado: 'direita' }], tela: SENHA },
       ['trava', 'Calma. Respira. Senha não é coisa pra fazer correndo.'],
-      ['trava', 'Eu sou a Trava, do Esquadrão Sentinela. Uma chave só não basta… mas vamos começar pela chave.'],
+      ['trava', 'Eu sou a Trava, do Esquadrão Sentinela. A Lupa me contou que você tem olho bom.'],
+      ['trava', 'Uma chave só não basta… mas vamos começar pela chave.'],
 
       // ---------- Decisão 1 ----------
       {
@@ -138,7 +139,7 @@
               texto: 'Aprovar, só pra parar de tocar',
               passos: [
                 { trecho: 'Trecho 6A · O sim que ela queria', cena: 'sala-escura', tela: null, atores: [{ id: 'forca', pose: 'brava', lado: 'centro' }] },
-                ['forca', 'Obrigada pelo sim! Bem-vinda ao seu e-mail… quer dizer, ao meu.'],
+                ['forca', 'Obrigada pelo sim! Seu e-mail… quer dizer, meu e-mail.'],
                 { cena: 'casa', atores: [{ id: 'trava', lado: 'direita' }] },
                 ['trava', 'Aprovar pra fazer parar é exatamente o que ela queria. O segundo fator só protege se você disser não.'],
                 ['trava', 'Se não foi você que pediu o login, a resposta é sempre negar. E avisar.']
@@ -185,7 +186,7 @@
       { cena: 'central', atores: [{ id: 'trava', lado: 'esquerda' }] },
       ['trava', 'Segunda insígnia conquistada, recruta.'],
       { insignia: true },
-      { cena: 'escritorio', atores: [{ id: 'vazamento', lado: 'esquerda', escala: .5 }], tela: { tipo: 'planilha', titulo: 'clientes_FINAL_v3.xlsx', vazando: true, colunas: ['Nome', 'CPF', 'Telefone'], linhas: [['Ana Souza', '123.456.789-00', '(11) 9••••-1020'], ['Bruno Lima', '987.654.321-00', '(21) 9••••-3344']] } },
+      { cena: 'escritorio', atores: [{ id: 'vazamento', lado: 'esquerda', escala: .5 }], tela: { tipo: 'planilha', titulo: 'clientes.xlsx', vazando: true, colunas: ['Nome', 'CPF', 'Telefone'], linhas: [['Ana Souza', '123.456.789-00', '(11) 9••••-1020'], ['Bruno Lima', '987.654.321-00', '(21) 9••••-3344']] } },
       ['narrador', 'Enquanto isso, numa planilha esquecida, alguma coisa começa a escorrer…'],
       ['narrador', 'Próxima missão: O Vazamento.'],
       { atores: [], tela: null }

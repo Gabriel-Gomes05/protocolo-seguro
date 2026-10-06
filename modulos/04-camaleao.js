@@ -20,12 +20,13 @@
       { tela: { tipo: 'chamada', nome: 'Suporte TI · [EMPRESA]', numero: '(11) 3090-4040' } },
       ['narrador', 'O telefone toca. O identificador diz: Suporte TI.'],
       { atores: [{ id: 'camaleao', lado: 'esquerda' }] },
-      ['camaleao', 'Oi, aqui é o Rafael, do suporte de TI. Tudo bem? Detectamos um acesso estranho na sua conta.'],
+      ['camaleao', 'Oi, aqui é o Lucas, do suporte de TI. Tudo bem? Detectamos um acesso estranho na sua conta.'],
       { tela: { tipo: 'chat', app: 'sms', titulo: '[EMPRESA]', sub: 'SMS', msgs: [{ texto: 'Seu código de verificação é 482 913. Não compartilhe este código com ninguém.', hora: '17:51' }] } },
       ['camaleao', 'Te mandei um código por SMS pra confirmar que é você. É só me ler os números, rapidinho, antes que bloqueiem tudo.'],
       { atores: [{ id: 'camaleao', lado: 'esquerda' }, { id: 'eco', lado: 'direita' }] },
       ['eco', 'Ei. Escuta só o que ele está pedindo.'],
-      ['eco', 'Sou o Eco, do Esquadrão Sentinela. Eu ouço mais do que falo… e essa ligação tem um barulho estranho.'],
+      ['eco', 'Sou o Eco, do Esquadrão Sentinela. A Íris falou bem de você.'],
+      ['eco', 'Eu ouço mais do que falo… e essa ligação tem um barulho estranho.'],
 
       // ---------- Decisão 1 ----------
       {
@@ -50,17 +51,17 @@
               passos: [
                 { trecho: 'Trecho 2B · Resposta pra tudo', atores: [{ id: 'camaleao', lado: 'centro' }], tela: null },
                 ['narrador', 'Você pergunta o nome completo, o setor, o nome do seu gestor.'],
-                ['camaleao', 'Rafael Moreira, Infraestrutura. Seu gestor é o Paulo, né? E você está no projeto novo… vi no seu perfil. Digo, no sistema.'],
+                ['camaleao', 'Lucas Moreira, Infraestrutura. Seu gestor é o Paulo, né? E você está no projeto novo… vi no seu perfil. Digo, no sistema.'],
                 { atores: [{ id: 'eco', lado: 'direita' }] },
                 ['eco', 'Viu? Ele tem resposta pra tudo. Muita coisa sobre você está nas redes sociais, e ele estudou antes de ligar.'],
                 ['eco', 'Perguntar pra ele não prova nada. Quem confere é você, por um canal que você escolhe.']
               ]
             },
             {
-              texto: 'Desligar e ligar para a Central Sentinela pelo número oficial', boa: true,
+              texto: 'Desligar e ligar para a [CANAL] pelo número oficial', boa: true,
               passos: [
                 { trecho: 'Trecho 2C · Outro canal', cena: 'central', atores: [], tela: { tipo: 'alerta', cor: 'verde', titulo: 'Ligação falsa reportada', texto: 'Ninguém do TI ligou para você. Código não compartilhado.' } },
-                ['narrador', 'Você desliga e liga para a Central Sentinela pelo número oficial. Ninguém do TI tinha ligado.'],
+                ['narrador', 'Você desliga e liga para a [CANAL] pelo número oficial. Ninguém do TI tinha ligado.'],
                 { cena: 'escritorio', tela: null, atores: [{ id: 'camaleao', pose: 'derrotado', lado: 'esquerda' }] },
                 ['camaleao', 'Desligou na minha cara? Que falta de educação!'],
                 { atores: [{ id: 'camaleao', pose: 'derrotado', lado: 'esquerda' }, { id: 'eco', lado: 'direita' }] },
@@ -133,7 +134,7 @@
       // ---------- Decisão 2 (rápida) ----------
       {
         decisao: {
-          pergunta: 'Decida rápido: o que você faz?', tempo: 10, padrao: 1,
+          pergunta: 'Decida rápido: o que você faz?', tempo: 10, padrao: 0,
           opcoes: [
             {
               texto: 'Segurar a porta, é só gentileza',
@@ -184,10 +185,10 @@
       { atores: [{ id: 'camaleao', pose: 'derrotado', lado: 'esquerda' }, { id: 'eco', lado: 'direita' }] },
       ['eco', 'Pressa e segredo? Hora de checar.'],
       { cena: 'central', atores: [{ id: 'eco', lado: 'esquerda' }] },
-      ['eco', 'Quarta insígnia, recruta. Com as quatro, você é um Sentinela completo.'],
+      ['eco', 'Quarta insígnia, recruta. Junte as quatro e você é um Sentinela completo.'],
       { insignia: true },
       { cena: 'telhado', atores: [{ id: 'trava', lado: 'esquerda', escala: .8 }, { id: 'iris', lado: 'meio-esquerda', escala: .8 }, { id: 'lupa', pose: 'frente', lado: 'meio-direita', escala: .8 }, { id: 'eco', lado: 'direita', escala: .8 }] },
-      ['narrador', 'O Esquadrão está completo. Missão bônus desbloqueada: Esquadrão Reunido.'],
+      ['narrador', 'O Esquadrão está reunido. E agora você faz parte dele.'],
       { atores: [] }
     ],
 

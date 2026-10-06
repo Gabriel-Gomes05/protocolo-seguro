@@ -24,7 +24,7 @@
     abertura: {
       cena: 'telhado',
       atores: [{ id: 'lupa', pose: 'frente', lado: 'meio-direita', escala: .9 }],
-      texto: 'Bem-vindo, recruta da [EMPRESA]. Em cerca de 8 minutos você vai enfrentar a **Isca**, o vilão do phishing. Suas escolhas mudam a história, e no final há um quiz de 5 perguntas.'
+      texto: 'Boas-vindas, recruta da [EMPRESA]. Em cerca de 8 minutos você vai enfrentar a **Isca**, o vilão do phishing. Suas escolhas mudam a história, e no final há um quiz de 5 perguntas.'
     },
 
     roteiro: [
@@ -37,7 +37,7 @@
       ['narrador', 'Um novo e-mail chega com destaque.'],
       { atores: [{ id: 'lupa', pose: 'tres-quartos', lado: 'direita' }] },
       ['lupa', 'Opa, opa. Antes de clicar… olha de novo.', { rosto: 'surpresa' }],
-      ['lupa', 'Prazer, Lupa, do Esquadrão Sentinela. Você é o recruta novo da [EMPRESA], né?', { rosto: 'sorriso' }],
+      ['lupa', 'Prazer, Lupa, do Esquadrão Sentinela. Você chegou agora na [EMPRESA], né?', { rosto: 'sorriso' }],
       ['lupa', 'Então vamos ver do que você é capaz.', { rosto: 'desconfiada' }],
 
       // ---------- Decisão 1 ----------
@@ -53,7 +53,7 @@
                 ['narrador', 'A página abre: uma tela de login igualzinha à da [EMPRESA].'],
                 ['narrador', 'Usuário… senha… entrar.'],
                 { cena: 'telhado', tela: null, atores: [{ id: 'isca', pose: 'fisgou', lado: 'centro' }], efeito: 'linha' },
-                ['isca', 'Fisgado! Que peixão!'],
+                ['isca', 'Fisguei! Que peixão!'],
                 ['isca', 'Com essa senha eu entro no e-mail, no sistema… quem sabe até na folha de pagamento.', { pose: 'tramando' }],
                 { cena: 'escritorio', atores: [{ id: 'lupa', pose: 'frente', lado: 'direita' }], tela: { tipo: 'login', url: 'http://atualiza-cadastro.net/rh/login.php', falso: true, usuario: 'seu.nome' } },
                 ['lupa', 'Acontece com gente muito experiente. Mas olha só o que eu teria visto antes.', { rosto: 'preocupada' }],
@@ -69,7 +69,7 @@
                 ['narrador', 'Você responde: “Isso é verdade?”'],
                 ['narrador', 'Segundos depois, chega a resposta.'],
                 { cena: 'telhado', tela: null, atores: [{ id: 'isca', pose: 'tramando', lado: 'centro' }] },
-                ['isca', 'Ele respondeu! Agora eu sei que esse endereço existe e que tem alguém lendo.'],
+                ['isca', 'Responderam! Agora eu sei que esse endereço existe e que tem alguém lendo.'],
                 ['isca', 'Vou caprichar no próximo.', { pose: 'apresentando' }],
                 { cena: 'escritorio', atores: [{ id: 'lupa', pose: 'tres-quartos', lado: 'direita' }] },
                 ['lupa', 'Quase. Perguntar foi uma boa intuição, mas pro lugar errado: quem responde é o próprio golpista.', { rosto: 'preocupada' }],
@@ -81,7 +81,7 @@
               passos: [
                 // Trecho 2C · Linha cortada
                 { trecho: 'Trecho 2C · Linha cortada', cena: 'central', atores: [], tela: { tipo: 'alerta', titulo: 'Phishing reportado', texto: 'rh@atualiza-cadastro.net · enviado para 300 caixas da [EMPRESA]' }, efeito: 'alerta' },
-                ['narrador', 'Você clica em Reportar. Na Central Sentinela, um alerta acende.'],
+                ['narrador', 'Você clica em Reportar. Na [CANAL], um alerta acende.'],
                 { cena: 'telhado', tela: null, atores: [{ id: 'isca', pose: 'tonto', lado: 'centro' }], efeito: 'linha' },
                 ['isca', 'Ei! Quem cortou minha linha?!'],
                 { cena: 'central', atores: [{ id: 'lupa', pose: 'frente', lado: 'direita' }], tela: { tipo: 'alerta', cor: 'verde', titulo: 'Golpe bloqueado', texto: '300 cópias apagadas das caixas de entrada' } },
@@ -209,7 +209,7 @@
       { atores: [{ id: 'isca', pose: 'rede', lado: 'esquerda', escala: .85 }, { id: 'lupa', pose: 'frente', lado: 'meio-direita' }] },
       ['lupa', 'E nesse dia você vai lembrar: olha de novo.', { rosto: 'sorriso' }],
       { cena: 'central', atores: [{ id: 'lupa', pose: 'frente', lado: 'esquerda' }] },
-      ['lupa', 'Bem-vindo ao Esquadrão Sentinela, recruta. Primeira insígnia conquistada.', { rosto: 'feliz' }],
+      ['lupa', 'Agora você é do Esquadrão Sentinela, recruta. Primeira insígnia conquistada.', { rosto: 'feliz' }],
       { insignia: true },
       { cena: 'sala-escura', atores: [{ id: 'forca', pose: 'sombra', lado: 'centro', escala: 1.1 }] },
       ['forca', '123456… senha123… [empresa]2026… Achei!', { voz: 'um, dois, três, quatro, cinco, seis… senha um dois três… [EMPRESA] dois mil e vinte e seis… Achei!' }],

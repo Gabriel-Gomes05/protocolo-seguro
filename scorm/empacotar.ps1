@@ -21,7 +21,7 @@ foreach ($m in $modulos) {
 
   $arquivos = @($m.pagina, 'config.js', 'player/player.js', 'player/player.css', 'player/elenco.js', 'player/scorm.js', $m.script)
   $arquivos += Get-ChildItem (Join-Path $raiz 'assets/personagens') -File | ForEach-Object { 'assets/personagens/' + $_.Name }
-  foreach ($pasta in @('assets/cenarios', ('assets/vozes/' + $m.id))) {
+  foreach ($pasta in @('assets/fontes', 'assets/cenarios', ('assets/vozes/' + $m.id))) {
     $p = Join-Path $raiz $pasta
     if (Test-Path $p) { $arquivos += Get-ChildItem $p -File -Recurse | ForEach-Object { $_.FullName.Substring($raiz.Length + 1).Replace('\', '/') } }
   }

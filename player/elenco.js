@@ -66,12 +66,14 @@
     recruta: { nome: 'Você' },
     lupa: {
       nome: 'Lupa', cor: '#2f7f86', arte: true, rosto: 'falando',
-      poses: ['frente', 'tres-quartos', 'perfil', 'costas', 'examinando', 'examinando-costas'],
+      poses: ['frente', 'tres-quartos', 'perfil', 'costas', 'examinando', 'examinando-costas',
+        // expressões no corpo (vista de frente), geradas com scripts/expressoes-corpo.py
+        ...['sorriso', 'rindo', 'feliz', 'surpresa', 'preocupada', 'seria', 'falando', 'desconfiada'].map(e => `frente-${e}`)],
       // centro e raio da lente em cada pose, em % da largura/altura do sprite
-      lente: { frente: [21.8, 60.5, 7], 'tres-quartos': [49.6, 57.6, 13.4], perfil: [82, 58.5, 14.5], examinando: [66.4, 11, 14.8] },
+      lente: { frente: [21.8, 60.5, 7], 'tres-quartos': [49.6, 57.6, 13.4], perfil: [82, 58.5, 14.5], examinando: [66.4, 11, 14.8], 'examinando-costas': null },
       // gesto da fala → pose desenhada. Só vale quando a pose estiver na lista "poses" acima.
       // Usa a versão da vista atual (ex.: examinando-costas) se existir; senão, a de frente.
-      gestos: { desconfiada: 'examinando', aponta: 'apontando', surpresa: 'erguendo', seria: 'apontando', rindo: 'comemorando', feliz: 'comemorando' }
+      gestos: { joia: 'joia', desconfiada: 'examinando', aponta: 'apontando', surpresa: 'erguendo', seria: 'apontando', rindo: 'comemorando', feliz: 'comemorando' }
     },
     isca: {
       nome: 'Isca', cor: '#c0392b', arte: true, vilao: true,
@@ -133,7 +135,9 @@
     if (!p) return '';
     if (p.arte) {
       const nome = p.poses.includes(pose) ? pose : 'frente';
-      const l = (p.lente || {})[nome];
+      // a lente de uma variante (ex.: frente-sorriso) é a da vista base (frente)
+      const lentes = p.lente || {};
+      const l = nome in lentes ? lentes[nome] : lentes[Object.keys(lentes).filter(k => nome.startsWith(k + '-')).sort((a, b) => b.length - a.length)[0]];
       const lente = l ? `<span class="lente" style="--lx:${l[0]}%;--ly:${l[1]}%;--lr:${l[2]}%"></span>` : '';
       return `<img src="${ARTE}${id}-${nome}.webp" alt="" draggable="false">${lente}`;
     }

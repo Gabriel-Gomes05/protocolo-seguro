@@ -35,7 +35,8 @@
       ['vazamento', 'Glub…'],
       { atores: [{ id: 'vazamento', lado: 'esquerda', escala: .5 }, { id: 'iris', lado: 'direita' }] },
       ['iris', 'Psiu. Antes de enviar, me deixa olhar.'],
-      ['iris', 'Sou a Íris, do Esquadrão Sentinela. Meus olhos brilham quando veem dado pessoal… e agora eles estão ofuscados.'],
+      ['iris', 'Sou a Íris, do Esquadrão Sentinela. A Trava disse que você sabe trancar uma porta.'],
+      ['iris', 'Meus olhos brilham quando veem dado pessoal… e agora eles estão ofuscados.'],
 
       // ---------- Decisão 1 ----------
       {
@@ -128,7 +129,7 @@
 
       // ---------- Trecho 5 · O Vazamento muda de tática ----------
       { trecho: 'Trecho 5 · O Vazamento muda de tática', cena: 'escritorio', atores: [{ id: 'vazamento', lado: 'esquerda', escala: .55 }], tela: PLANILHA },
-      ['narrador', 'Meio-dia. Fome. Você levanta para almoçar com a planilha aberta na tela.'],
+      ['narrador', 'Quinta-feira, meio-dia. Fome. Você levanta para almoçar com a planilha aberta na tela.'],
       ['vazamento', 'Glub… tela aberta… ninguém olhando…'],
       { atores: [{ id: 'vazamento', lado: 'esquerda', escala: .55 }, { id: 'iris', lado: 'direita' }] },
       ['iris', 'Tela aberta é porta aberta. E agora?'],
@@ -136,7 +137,7 @@
       // ---------- Decisão 2 (rápida) ----------
       {
         decisao: {
-          pergunta: 'Decida rápido: o que você faz?', tempo: 10, padrao: 1,
+          pergunta: 'Decida rápido: o que você faz?', tempo: 10, padrao: 0,
           opcoes: [
             {
               texto: 'Deixar aberta, volto em 5 minutos',

@@ -3,6 +3,7 @@ window.SentinelaSCORM = (() => {
   let api = null;
   let ativo = false;
   let terminado = false;
+  let concluido = false;
   const inicio = Date.now();
 
   function procurar(win) {
@@ -41,6 +42,7 @@ window.SentinelaSCORM = (() => {
     set('cmi.core.score.raw', nota);
     set('cmi.core.lesson_status', aprovado ? 'passed' : 'failed');
     set('cmi.core.session_time', tempo(Date.now() - inicio));
+    concluido = true;
     api.LMSCommit('');
   }
 
@@ -48,7 +50,7 @@ window.SentinelaSCORM = (() => {
     if (!ativo || terminado) return;
     terminado = true;
     set('cmi.core.session_time', tempo(Date.now() - inicio));
-    set('cmi.core.exit', '');
+    set('cmi.core.exit', concluido ? '' : 'suspend');
     api.LMSCommit('');
     api.LMSFinish('');
   }
