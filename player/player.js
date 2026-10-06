@@ -253,15 +253,19 @@
       vistos.add(a.id);
       let e = ui.atores.querySelector(`[data-ator="${a.id}"]`);
       if (!e) {
-        e = el('div', 'ator entrando');
+        e = el('div', `ator entrando ${(ELENCO[a.id] || {}).vilao ? 'vilao' : 'heroi'}`);
         e.dataset.ator = a.id;
         ui.atores.appendChild(e);
         requestAnimationFrame(() => requestAnimationFrame(() => e.classList.remove('entrando')));
       }
-      e.dataset.lado = a.lado || 'direita';
+      const lado = a.lado || 'direita';
+      if (e.dataset.lado && e.dataset.lado !== lado) andar(e);
+      e.dataset.lado = lado;
       e.style.setProperty('--escala', a.escala || 1);
       e.classList.toggle('espelhado', !!a.espelhar);
+      const nasceu = !e.dataset.pose;
       definirPose(e, a.id, a.pose);
+      if (nasceu) gesto(e, 'chegada');
     });
     ui.atores.querySelectorAll('.ator').forEach(e => {
       if (!vistos.has(e.dataset.ator) && !e.classList.contains('saindo')) {
@@ -275,7 +279,51 @@
     if (e.dataset.pose === p) return;
     e.dataset.pose = p;
     e.className = e.className.replace(/\bpose-\S+/g, '').trim() + ` pose-${p}`;
-    e.innerHTML = spriteDe(id, p);
+    // troca de pose em crossfade: a pose antiga some por cima da nova
+    e.querySelectorAll('.sprite.saindo').forEach(s => s.remove());
+    const antiga = e.querySelector('.sprite');
+    const nova = el('div', 'sprite', spriteDe(id, p));
+    e.appendChild(nova);
+    if (antiga) {
+      antiga.classList.add('saindo');
+      setTimeout(() => antiga.remove(), 400);
+    }
+  }
+  // passos enquanto o ator desliza para o novo lado do palco
+  function andar(e) {
+    e.classList.add('andando');
+    clearTimeout(e._andar);
+    e._andar = setTimeout(() => e.classList.remove('andando'), 900);
+  }
+  // gestos sorteados quando a fala não marca expressão (sem repetir o anterior)
+  const GESTOS = {
+    heroi: ['falando', 'enfase', 'explica', 'sorriso', 'aponta'],
+    vilao: ['tramando', 'gargalhada', 'ameaca', 'desdem', 'falando']
+  };
+  function gestoDaFala(e, f) {
+    if (f.rosto) return f.rosto;
+    const lista = GESTOS[e.classList.contains('vilao') ? 'vilao' : 'heroi'].filter(g => g !== e._gesto);
+    return lista[Math.floor(Math.random() * lista.length)];
+  }
+  // quem está em cena reage a quem fala, virando o corpo na direção dele
+  function escutar(falante) {
+    if (!falante) return;
+    const f = falante.getBoundingClientRect();
+    ui.atores.querySelectorAll('.ator:not(.saindo)').forEach(a => {
+      if (a === falante) return;
+      const r = a.getBoundingClientRect();
+      a.style.setProperty('--olhar', (f.left + f.width / 2) > (r.left + r.width / 2) ? 1 : -1);
+      gesto(a, a.classList.contains('vilao') ? 'escuta-vilao' : 'escuta');
+    });
+  }
+  // gesto corporal de uma fala (o CSS define quais atores têm gestos)
+  function gesto(e, nome) {
+    const s = e.querySelector('.sprite:not(.saindo)');
+    if (!s || !nome) return;
+    s.className = 'sprite';
+    void s.offsetWidth;
+    s.classList.add(`gesto-${nome}`);
+    e._gesto = nome;
   }
 
   const celular = (html, extra = '') => `<div class="t-celular ${extra}"><div class="t-celular-notch"></div><div class="t-celular-tela">${html}</div></div>`;
@@ -331,6 +379,7 @@
 
   function tela(spec) {
     ui.notas.innerHTML = '';
+    recolherLente();
     ui.tela.querySelectorAll('.tela:not(.saindo)').forEach(antiga => { antiga.classList.add('saindo'); setTimeout(() => antiga.remove(), 350); });
     ui.palco.classList.toggle('foco', !!(spec && spec.foco));
     if (!spec) return;
@@ -349,12 +398,38 @@
       if (p.closest('.t-email-link')) caixa.classList.add('mostrar-url');
     }));
     caixa.classList.add('com-destaques');
+    if (passo.destacar !== 'todas') apontarLente(caixa.querySelector(`.pista[data-pista="${chaves[0]}"]`));
     if (passo.nota) {
       const n = el('div', 'nota', marcar(passo.nota));
       ui.notas.appendChild(n);
       Som.clique();
     }
     if (passo.limparNotas) ui.notas.innerHTML = '';
+  }
+
+  // a Lupa aponta a lupa: uma lente sai da mão dela e para em cima da pista
+  function apontarLente(alvo) {
+    recolherLente();
+    const origem = ui.atores.querySelector('.ator:not(.saindo) .sprite:not(.saindo) .lente');
+    if (!alvo || !origem) return;
+    const ator = origem.closest('.ator');
+    gesto(ator, 'aponta');
+    const p = ui.palco.getBoundingClientRect(), o = origem.getBoundingClientRect(), a = alvo.getBoundingClientRect();
+    const tam = Math.min(170, Math.max(84, Math.max(a.width * .55, a.height * 2.2)));
+    const x = a.left + a.width / 2 - p.left - tam / 2, y = a.top + a.height / 2 - p.top - tam / 2;
+    const dx = o.left + o.width / 2 - p.left - tam / 2 - x, dy = o.top + o.height / 2 - p.top - tam / 2 - y;
+    const s0 = Math.max(.15, o.width / tam);
+    const lente = el('div', 'lente-voadora');
+    lente.style.cssText = `left:${x}px;top:${y}px;width:${tam}px;height:${tam}px`;
+    ui.palco.appendChild(lente);
+    if (lente.animate) lente.animate([
+      { transform: `translate(${dx}px, ${dy}px) scale(${s0})`, opacity: 0 },
+      { transform: `translate(${dx * .45}px, ${dy * .45 - 60}px) scale(${(s0 + 1) / 2}) rotate(-12deg)`, opacity: 1, offset: .45 },
+      { transform: 'none', opacity: 1 }
+    ], { duration: 750, easing: 'cubic-bezier(.22,.61,.36,1)', fill: 'backwards' });
+  }
+  function recolherLente() {
+    ui.palco.querySelectorAll('.lente-voadora:not(.saindo)').forEach(l => { l.classList.add('saindo'); setTimeout(() => l.remove(), 300); });
   }
 
   // ---------- legendas e falas ----------
@@ -366,6 +441,8 @@
     $('.legenda-rosto', ui.legenda).innerHTML = rostoDe(quem, o.rosto);
     $('.legenda-quem', ui.legenda).textContent = quem === 'narrador' ? '' : p.nome.toUpperCase();
     $('p', ui.legenda).innerHTML = marcar(texto);
+    const corpo = $('.legenda-corpo', ui.legenda);
+    if (corpo.animate) corpo.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 280, easing: 'cubic-bezier(.22,.61,.36,1)' });
   }
 
   function leitura(texto) { return Math.min(9000, Math.max(1900, txt(texto).length * 58 + 900)); }
@@ -374,6 +451,14 @@
     legenda(f.quem, f.texto, f);
     const ator = ui.atores.querySelector(`[data-ator="${f.quem}"]`);
     if (ator && f.pose) definirPose(ator, f.quem, f.pose);
+    const g = ator ? gestoDaFala(ator, f) : null;
+    const p = ELENCO[f.quem] || {};
+    const poseAntes = ator && ator.dataset.pose;
+    const base = ator && !f.pose && (p.gestos || {})[g];
+    const poseGesto = base && [`${base}-${poseAntes}`, base].find(n => (p.poses || []).includes(n));
+    if (poseGesto) definirPose(ator, f.quem, poseGesto);
+    if (ator) gesto(ator, g);
+    escutar(ator);
     ui.atores.querySelectorAll('.ator').forEach(a => a.classList.toggle('falando', a === ator));
     const voz = Voz.falar(textoVoz(f.voz || f.texto), f.id, f.quem);
     const minimo = esperar(Math.min(900, leitura(f.texto)));
@@ -384,6 +469,7 @@
     }
     Voz.cancelar();
     if (ator) ator.classList.remove('falando');
+    if (ator && ator.dataset.pose !== poseAntes && ator.dataset.pose === poseGesto) definirPose(ator, f.quem, poseAntes);
   }
 
   // ---------- selos, efeitos e insígnia ----------

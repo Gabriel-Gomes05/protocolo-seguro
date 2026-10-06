@@ -66,10 +66,15 @@
     recruta: { nome: 'Você' },
     lupa: {
       nome: 'Lupa', cor: '#2f7f86', arte: true, rosto: 'falando',
-      poses: ['frente', 'tres-quartos', 'perfil', 'costas']
+      poses: ['frente', 'tres-quartos', 'perfil', 'costas', 'examinando', 'examinando-costas'],
+      // centro e raio da lente em cada pose, em % da largura/altura do sprite
+      lente: { frente: [21.8, 60.5, 7], 'tres-quartos': [49.6, 57.6, 13.4], perfil: [82, 58.5, 14.5], examinando: [66.4, 11, 14.8] },
+      // gesto da fala → pose desenhada. Só vale quando a pose estiver na lista "poses" acima.
+      // Usa a versão da vista atual (ex.: examinando-costas) se existir; senão, a de frente.
+      gestos: { desconfiada: 'examinando', aponta: 'apontando', surpresa: 'erguendo', seria: 'apontando', rindo: 'comemorando', feliz: 'comemorando' }
     },
     isca: {
-      nome: 'Isca', cor: '#c0392b', arte: true,
+      nome: 'Isca', cor: '#c0392b', arte: true, vilao: true,
       poses: ['frente', 'tres-quartos', 'perfil', 'costas', 'lancando', 'fisgou', 'tonto', 'rede', 'apresentando', 'apontando', 'tramando']
     },
     trava: {
@@ -94,10 +99,10 @@
         extra: '<path d="M62 74 Q62 30 100 30 Q138 30 138 74" fill="none" stroke="#222" stroke-width="7"/><rect x="54" y="64" width="16" height="26" rx="6" fill="#333"/><rect x="130" y="64" width="16" height="26" rx="6" fill="#333"/><path d="M160 60 q12 18 0 36 M172 50 q20 28 0 56" fill="none" stroke="#f3c06b" stroke-width="4" stroke-linecap="round" class="ondas"/>'
       })
     },
-    forca: { nome: 'A Força Bruta', cor: '#ff2e3b', provisorio: true, svg: forcaBruta },
-    vazamento: { nome: 'Vazamento', cor: '#2fbf8f', provisorio: true, svg: vazamento },
+    forca: { nome: 'A Força Bruta', cor: '#ff2e3b', provisorio: true, vilao: true, svg: forcaBruta },
+    vazamento: { nome: 'Vazamento', cor: '#2fbf8f', provisorio: true, vilao: true, svg: vazamento },
     camaleao: {
-      nome: 'Camaleão', cor: '#5cbf4a', provisorio: true,
+      nome: 'Camaleão', cor: '#5cbf4a', provisorio: true, vilao: true,
       svg: () => `<div class="camaleao-pele">${figura({
         casaco: '#3d7f45', gola: '#cfe8c6', pele: '#86c27a', cabelo: '#2d5a2c',
         peito: '<g><rect x="60" y="180" width="36" height="46" rx="4" fill="#fff" stroke="#111" stroke-width="2"/><rect x="66" y="186" width="24" height="18" fill="#9ec5ff"/><rect x="66" y="210" width="24" height="4" fill="#555"/><rect x="66" y="217" width="16" height="4" fill="#555"/></g>'
@@ -128,7 +133,9 @@
     if (!p) return '';
     if (p.arte) {
       const nome = p.poses.includes(pose) ? pose : 'frente';
-      return `<img src="${ARTE}${id}-${nome}.webp" alt="" draggable="false">`;
+      const l = (p.lente || {})[nome];
+      const lente = l ? `<span class="lente" style="--lx:${l[0]}%;--ly:${l[1]}%;--lr:${l[2]}%"></span>` : '';
+      return `<img src="${ARTE}${id}-${nome}.webp" alt="" draggable="false">${lente}`;
     }
     return p.svg ? p.svg() + (p.provisorio ? '<span class="arte-provisoria">arte provisória</span>' : '') : '';
   }
