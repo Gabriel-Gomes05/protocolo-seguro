@@ -2,12 +2,21 @@
    Motor do player: estado, avanço das falas, áudio, legendas, overlays (decisões, juramento, Central de Missões, quiz), SCORM e controles. */
 
 /* ===================== Estado e motor ===================== */
+/* Páginas de desenvolvimento por missão (missao0.html, missao1.html…) definem MISSAO_FOCO antes dos scripts; o index.html não. */
+const FOCO = typeof MISSAO_FOCO === "number" ? MISSAO_FOCO : null;
 const S = { scene: "inicio", li: 0, stage: { bg: "title" }, auto: true, som: true, token: 0, timers: [], escolhas: [], hs: { found: new Set(), miss: 0 }, quiz: { i: 0, ok: 0, answered: false, seq: 0 }, inicio: Date.now(), lastSig: "", lastFx: "" };
 
 function clearTimers() { S.timers.forEach(t => clearTimeout(t)); S.timers = []; }
 function later(fn, ms) { const tok = S.token; S.timers.push(setTimeout(() => { if (tok === S.token) fn(); }, ms)); }
 
-const RENDER = { start: renderStart, decision: renderDecision, hotspot: renderHotspot, quiz: renderQuiz, end: renderEnd, juramento: renderJuramento, aceite: renderAceite, hub: renderHub };
+const RENDER = { start: renderStart, decision: renderDecision, hotspot: renderHotspot, classificar: renderClassificar, quiz: renderQuiz, end: renderEnd, juramento: renderJuramento, aceite: renderAceite, hub: renderHub };
+/* Quiz e fecho da missão do trecho atual (a Missão 1 é o padrão) */
+const quizDe = m => QUIZZES[m] || QUIZ;
+const missaoAtual = () => SCENES[S.scene].m || 1;
+const cenaDe = (m, tipo) => Object.keys(SCENES).find(id => SCENES[id].m === m && SCENES[id].type === tipo);
+const novoQuiz = () => ({ i: 0, ok: 0, answered: false, seq: 0 });
+/* Telas que chegam com som de notificação */
+const NOTIFICA = new Set(["email1", "sms", "push"]);
 function go(id) {
   const sc = SCENES[id];
   if (!sc) return;
@@ -16,7 +25,7 @@ function go(id) {
   if (sc.stage) S.stage = { ...S.stage, quadro: null, com: null, ...sc.stage };   // o quadro não passa de um trecho para outro
   markChapters(sc);
   if (sc.type === "lines") playLine();
-  else { renderStage(); RENDER[sc.type](sc); }
+  else { marcarFala(null); renderStage(); RENDER[sc.type](sc); }
 }
 
 function playLine() {
@@ -25,8 +34,9 @@ function playLine() {
   S.stage = { ...S.stage, ...(ln.set || {}), com: ln.radio || null };   // com: a fala chega pelo comunicador
   renderStage();
   renderCaption(ln);
+  marcarFala(ln.who);
   const set = ln.set || {};
-  if (set.screen === "email1" || set.screen === "sms") efeito("notificacao", .5);
+  if (NOTIFICA.has(set.screen) || set.pushes) efeito("notificacao", .5);
   if (set.fx === "rewind") efeito("rebobinar", .5);
   if (set.fx === "badge") efeito("insignia", .55);
   if (set.fx === "stamp") efeito("acerto", .5);
@@ -34,14 +44,24 @@ function playLine() {
   if (set.fx === "vozfalsa") efeito("erro", .45);
   if (S.li === 0 && S.stage.fx === "alarme") bip("sirene");
   if (ln.radio) bip("radio");
+  if (set.digitar) bip("teclas");
+  /* impacto: true na fala dá um tranco de câmera (estilo .art.impacto no CSS da missão) */
+  if (ln.impacto) { const a = $("art"); a.classList.remove("impacto"); void a.offsetWidth; a.classList.add("impacto"); bip("glitch"); }
   /* depois: muda o palco no meio da fala (ex.: a Lupa andando → já parada na mesa) */
   if (ln.depois) later(() => { S.stage = { ...S.stage, ...ln.depois }; renderStage(); }, lineMs(ln) * .5);
-  if (falar(arquivoFala(S.scene, S.li, ln), () => { if (S.auto) later(nextLine, 250); })) return;
+  /* sem o arquivo de áudio (fala ainda não gravada), a legenda fica o tempo de leitura */
+  if (falar(arquivoFala(S.scene, S.li, ln), () => { if (S.auto) later(nextLine, 250); }, lineMs(ln))) return;
   if (S.auto) later(nextLine, lineMs(ln));
+}
+/* Quem fala: data-voz no palco (ex.: olhos da Força Bruta acendem) e .falando no herói em cena (HEROIS[k].voz). O estilo fica no CSS da missão. */
+function marcarFala(who) {
+  $("stage").dataset.voz = (who && VOZ_ARQ[who]) || "";
+  for (const c of $("art").querySelectorAll(".char[data-k^=\"heroi-\"]")) { const h = HEROIS[c.dataset.k.slice(6)]; c.classList.toggle("falando", !!who && !!h && h.voz === who); }
 }
 const lineMs = ln => Math.max(2600, 1300 + fmt(ln.t).length * 52);
 
 function nextLine() {
+  if (S.pausado) return;
   const sc = SCENES[S.scene];
   if (!sc || sc.type !== "lines") return;
   if (S.li < sc.lines.length - 1) { S.li++; playLine(); } else go(sc.next);
@@ -64,8 +84,8 @@ function renderStage(force) {
     $("dock").innerHTML = scr;
     let fx = "";
     if (st.fx === "rewind") fx = `<div class="rewind">◀◀ VOLTANDO A FITA</div>`;
-    if (st.fx === "badge") fx = `<div class="badge-fx">${BADGE_SVG}</div>`;
-    if (st.fx === "stamp") fx = `<div class="stamp">Selo conquistado: Olho Vivo</div>`;
+    if (st.fx === "badge") fx = `<div class="badge-fx">${INSIGNIAS[st.insignia] || BADGE_SVG}</div>`;
+    if (st.fx === "stamp") fx = `<div class="stamp">Selo conquistado: ${esc(st.selo || "Olho Vivo")}</div>`;
     if (fx !== S.lastFx) { $("fx").innerHTML = fx; S.lastFx = fx; }   // mesmo efeito: não reinicia a animação
     S.lastSig = sig;
   }
@@ -77,6 +97,7 @@ function renderCaption(ln) {
   const subs = $("subs");
   subs.textContent = fmt(ln.t);
   subs.className = "subs" + (ln.who === N ? " narr" : "") + (ln.who === K ? " falsa" : "");
+  void subs.offsetWidth; subs.classList.add("entra");   // reinicia a entrada da legenda (estilo opcional no CSS da missão)
   $("btnSkip").hidden = false;
 }
 function showOverlay(kind) {
@@ -90,6 +111,7 @@ function showOverlay(kind) {
 
 /* Abertura: primeira vez, o recrutamento; quem já fez entra pela Central de Missões */
 function renderStart() {
+  if (FOCO !== null) return renderFoco();
   trilha(TRILHA_ALTA);
   showOverlay("start");
   const volta = PROG.m0, p = PROG.patente();
@@ -108,6 +130,21 @@ function renderStart() {
   $("btnStart").onclick = () => { S.inicio = Date.now(); bip(); go(volta ? "hub" : "m0a"); };
   if (volta) $("btnRever").onclick = () => { S.inicio = Date.now(); bip(); go("m0a"); };
 }
+/* Abertura da página de desenvolvimento: só a missão em foco, sem passar pelo recrutamento nem pela Central */
+function renderFoco() {
+  trilha(TRILHA_ALTA);
+  showOverlay("start");
+  const m = MISSOES.find(x => x.n === FOCO);
+  $("panel").innerHTML = `
+    <div class="ep">
+      <p class="ep-kicker">Esquadrão Sentinela · página de desenvolvimento</p>
+      <h1 class="ep-title">Missão ${m.n} · ${esc(m.titulo)}</h1>
+      <p class="ep-meta"><span>${esc(m.tema)}</span>${m.heroi ? `<span>com ${esc(m.heroi)}</span>` : ""}</p>
+      <p class="ep-sinopse">${m.inicio ? "Só esta missão. Use Personalizar para pular direto para um trecho." : "Esta missão ainda não tem roteiro."}</p>
+    </div>
+    <div class="cap-actions">${m.inicio ? `<button class="primary" id="btnStart">Começar a missão</button>` : ""}</div>`;
+  if (m.inicio) $("btnStart").onclick = () => { S.inicio = Date.now(); bip(); iniciarMissao(FOCO); };
+}
 
 /* Decisões (e a enquete da Missão 0). Cada opção pode trazer xp, motivo, conq (conquista) e reflexo (bônus por decidir rápido). */
 function renderDecision(sc) {
@@ -118,18 +155,19 @@ function renderDecision(sc) {
   const escolha = `<p class="prompt">${esc(fmt(sc.prompt))}</p>${sc.nota ? `<p class="hint">${esc(sc.nota)}</p>` : ""}
     ${sc.timer ? `<div class="countdown"><i style="animation-duration:${sc.timer}s;--d:${sc.timer}s"></i></div>` : ""}
     <div class="options">${sc.options.map((o, i) => `<button class="opt" data-i="${i}"><span class="k">${letters[i]}</span><span>${esc(fmt(o.t))}</span></button>`).join("")}</div>`;
-  $("panel").innerHTML = sc.tela ? `<div class="dec-grid"><div class="dec-tela challenge">${SCREENS[sc.tela]()}</div><div class="dec-opcoes">${escolha}</div></div>` : escolha;
+  $("panel").innerHTML = sc.tela ? `<div class="dec-grid"><div class="dec-tela challenge">${SCREENS[sc.tela](S.stage)}</div><div class="dec-opcoes">${escolha}</div></div>` : escolha;
   $("panel").querySelectorAll(".opt").forEach(btn => btn.onclick = () => {
     const o = sc.options[+btn.dataset.i];
     S.escolhas.push(o.tag);
     PROG.ganhar("dec:" + S.scene, o.xp, o.motivo);
     if (o.conq) PROG.conquistar(o.conq);
-    if (o.reflexo && Date.now() - t0 < 5000) { PROG.ganhar("reflexo", XP.reflexo, "Reflexo rápido"); PROG.conquistar("reflexo"); }
+    /* reflexo: true (Missão 1) ou o id da conquista de reflexo da missão; o XP conta uma vez por missão */
+    if (o.reflexo && Date.now() - t0 < 5000) { PROG.ganhar("reflexo" + (sc.m > 1 ? sc.m : ""), XP.reflexo, "Reflexo rápido"); PROG.conquistar(o.reflexo === true ? "reflexo" : o.reflexo); }
     go(o.go);
   });
   if (sc.timer) later(() => {
-    S.escolhas.push("Decisão 2: tempo esgotado");
-    $("panel").innerHTML = `<p class="prompt">Tempo esgotado.</p><p class="line" style="font-size:17px">Sem problema: veja o que a Lupa faria.</p>`;
+    S.escolhas.push(sc.timeoutTag || "Decisão 2: tempo esgotado");
+    $("panel").innerHTML = `<p class="prompt">Tempo esgotado.</p><p class="line" style="font-size:17px">${esc(sc.timeoutTxt || "Sem problema: veja o que a Lupa faria.")}</p>`;
     bip("erro");
     later(() => go(sc.timeoutGo), 1600);
   }, sc.timer * 1000);
@@ -185,10 +223,51 @@ function renderHotspot(sc) {
   draw();
 }
 
+/* Desafio de classificar: cada item recebe uma categoria (ex.: senha fraca ou forte). Erro mostra a resposta certa, sem XP.
+   sc: prompt, cats (rótulos), itens [{t, c: índice da categoria certa, e: explicação}], xp por acerto, perfeito (bônus sem erro),
+   conq (conquista sem erro), fala {who, cls, t, a} dita ao terminar */
+function renderClassificar(sc) {
+  trilha(TRILHA_ALTA);
+  showOverlay("wide");
+  const resp = {}, n = sc.itens.length; let ultimo = -1;
+  const draw = () => {
+    const feitos = Object.keys(resp).length, done = feitos === n;
+    const erros = Object.keys(resp).filter(i => resp[i] !== sc.itens[i].c).length;
+    $("panel").innerHTML = `
+      <p class="prompt">${done ? (erros ? `Desafio concluído: ${n - erros} de ${n}.` : "Nenhum erro. Nada passa por você!") : esc(fmt(sc.prompt))}</p>
+      <div class="counter"><span class="dots">${sc.itens.map((_, i) => `<i class="${i in resp ? "on" : ""}"></i>`).join("")}</span><span class="hint">${feitos} de ${n} · ${sc.xp} XP por acerto${erros ? ` · ${erros} erro${erros > 1 ? "s" : ""}` : " · sem erros vale bônus"}</span></div>
+      <ul class="classif">${sc.itens.map((it, i) => {
+        if (!(i in resp)) return `<li class="cl-item"><span class="cl-t">${esc(fmt(it.t))}</span><span class="cl-bts">${sc.cats.map((c, k) => `<button class="secondary cl-b" data-i="${i}" data-k="${k}">${esc(c)}</button>`).join("")}</span></li>`;
+        const certo = resp[i] === it.c;
+        return `<li class="cl-item ${certo ? "certo" : "errado"}${i === ultimo ? " agora" : ""}"><span class="cl-t">${esc(fmt(it.t))}</span><span class="cl-tag">${esc(sc.cats[it.c])}</span>
+          <span class="cl-e"><b>${certo ? "Certo." : `Na verdade, é ${esc(sc.cats[it.c].toLowerCase())}.`}</b> ${esc(fmt(it.e))}</span></li>`;
+      }).join("")}</ul>
+      ${done && sc.fala ? `<div class="cap"><span class="who who--${sc.fala.cls || "lupa"}">${esc(sc.fala.nome)}</span><p class="line">${esc(fmt(sc.fala.t))}</p></div>` : ""}
+      ${done ? `<div class="cap-actions"><button class="primary" id="btnNext">Continuar</button></div>` : ""}`;
+    $("panel").querySelectorAll(".cl-b").forEach(b => b.onclick = () => {
+      const i = +b.dataset.i, k = +b.dataset.k, it = sc.itens[i];
+      if (i in resp) return;
+      resp[i] = k; ultimo = i;
+      if (k === it.c) { efeito("acerto", .45); PROG.ganhar(`cl:${S.scene}:${i}`, sc.xp, "Classificação certa"); } else efeito("erro", .35);
+      draw();
+      const prox = $("panel").querySelector(".cl-b"); if (prox) prox.focus({ preventScroll: true });
+      if (Object.keys(resp).length === n) {
+        if (!Object.keys(resp).some(j => resp[j] !== sc.itens[j].c)) { PROG.ganhar(`cl-perfeito:${S.scene}`, sc.perfeito, "Nenhum erro no desafio"); if (sc.conq) PROG.conquistar(sc.conq); }
+        efeito("insignia", .45);
+        if (sc.fala && sc.fala.a) later(() => falar(CONFIG.midia + "audio/" + sc.fala.a, () => trilha(TRILHA_ALTA)), 700);
+        $("btnNext").focus({ preventScroll: true });
+      }
+    });
+    if (done) $("btnNext").onclick = () => go(sc.next);
+  };
+  draw();
+}
+
 /* Quiz: 40 XP por acerto (uma vez por pergunta) e bônus de sequência a partir do 3º acerto seguido */
 function renderQuiz() {
   trilha(TRILHA_ALTA);
   showOverlay("card");
+  const sc = SCENES[S.scene], m = missaoAtual(), QUIZ = quizDe(m), px = m > 1 ? m : "";   // px: chaves de XP separadas por missão
   const q = QUIZ[S.quiz.i];
   const ans = S.quiz.answered;
   $("panel").innerHTML = `
@@ -202,8 +281,8 @@ function renderQuiz() {
     S.quiz.answered = i;
     if (certo) {
       S.quiz.ok++; S.quiz.seq++;
-      PROG.ganhar("quiz:" + S.quiz.i, XP.quiz, "Resposta certa");
-      if (S.quiz.seq >= 3) PROG.ganhar("seq:" + S.quiz.i, XP.sequencia, `Sequência de ${S.quiz.seq} acertos`);
+      PROG.ganhar(`quiz${px}:` + S.quiz.i, XP.quiz, "Resposta certa");
+      if (S.quiz.seq >= 3) PROG.ganhar(`seq${px}:` + S.quiz.i, XP.sequencia, `Sequência de ${S.quiz.seq} acertos`);
     } else S.quiz.seq = 0;
     efeito(certo ? "acerto" : "erro", .45);
     renderQuiz();
@@ -212,40 +291,41 @@ function renderQuiz() {
   const nb = $("btnQ");
   if (nb) nb.onclick = () => {
     S.quiz.answered = false;
-    if (S.quiz.i < QUIZ.length - 1) { S.quiz.i++; renderQuiz(); } else go("fim");
+    if (S.quiz.i < QUIZ.length - 1) { S.quiz.i++; renderQuiz(); } else go(sc.next || "fim");
   };
 }
 
-const estrelas = ok => ok >= QUIZ.length ? 3 : ok >= CONFIG.notaMinima ? 2 : ok >= 2 ? 1 : 0;
+const estrelas = (ok, total = QUIZ.length) => ok >= total ? 3 : ok >= CONFIG.notaMinima ? 2 : ok >= 2 ? 1 : 0;
 const estrelasHTML = n => `<span class="estrelas" aria-label="${n} de 3 estrelas">${[1, 2, 3].map(i => `<i class="${i <= n ? "on" : ""}">${ic("estrela")}</i>`).join("")}</span>`;
 
 function renderEnd() {
   trilha(TRILHA_ALTA);
   showOverlay("card");
+  const m = missaoAtual(), QUIZ = quizDe(m), FIM = FINAIS[m] || FINAIS[1];
   const ok = S.quiz.ok, pass = ok >= CONFIG.notaMinima;
   if (pass) efeito("insignia", .55);
   SCORM.set("cmi.core.score.min", 0);
   SCORM.set("cmi.core.score.max", 100);
-  SCORM.set("cmi.core.score.raw", ok * 20);
+  SCORM.set("cmi.core.score.raw", Math.round(ok / QUIZ.length * 100));
   SCORM.set("cmi.core.lesson_status", pass ? "passed" : "failed");
   SCORM.set("cmi.core.session_time", tempoSessao());
   SCORM.commit();
-  PROG.registrarNota(1, ok);
-  if (pass) { PROG.ganhar("aprovado:1", XP.aprovado, "Missão 1 cumprida"); PROG.conquistar("lupa"); }
-  if (ok === QUIZ.length) PROG.conquistar("gabarito");
+  PROG.registrarNota(m, ok);
+  if (pass) { PROG.ganhar("aprovado:" + m, XP.aprovado, `Missão ${m} cumprida`); PROG.conquistar(FIM.insignia); }
+  if (ok === QUIZ.length) PROG.conquistar(FIM.gabarito);
   if (!pass) { S.stage = { ...S.stage, fx: null }; renderStage(); }
   const p = PROG.patente();
   $("panel").innerHTML = `<div class="result">
     <p class="eyebrow">${pass ? "Missão cumprida" : "Quase lá"}</p>
-    <div class="res-top"><p class="score">${ok}<small> de ${QUIZ.length} acertos</small></p>${estrelasHTML(estrelas(ok))}</div>
-    <p class="line" style="font-size:17px">${pass ? "Insígnia da Lupa conquistada. Você já enxerga a isca antes de morder." : `Para conquistar a insígnia são ${CONFIG.notaMinima} acertos. Refaça o quiz; as explicações da Lupa ajudam.`}</p>
+    <div class="res-top"><p class="score">${ok}<small> de ${QUIZ.length} acertos</small></p>${estrelasHTML(estrelas(ok, QUIZ.length))}</div>
+    <p class="line" style="font-size:17px">${pass ? esc(FIM.ganhou) : `Para conquistar a insígnia são ${CONFIG.notaMinima} acertos. Refaça o quiz; ${esc(FIM.dica)}`}</p>
     <div class="chips"><span class="chip gold">${ic("estrela")} ${PROG.xp} XP · ${esc(p.nome)}</span>${Object.keys(CONQUISTAS).filter(PROG.tem).map(c => `<span class="chip gold">${esc(CONQUISTAS[c].nome)}</span>`).join("")}<span class="chip">Tempo: ${tempoSessao()}</span></div>
     <ul class="choices">${S.escolhas.map(c => `<li>${esc(c)}</li>`).join("")}</ul>
     <div class="cap-actions">${pass ? `<button class="primary" id="btnHub">Voltar à Central de Missões</button>` : `<button class="primary" id="btnRetry">Refazer o quiz</button>`}<button class="secondary" id="btnAgain">Rever a missão</button></div>
   </div>`;
-  const r = $("btnRetry"); if (r) r.onclick = () => { S.quiz = { i: 0, ok: 0, answered: false, seq: 0 }; go("quiz"); };
+  const r = $("btnRetry"); if (r) r.onclick = () => { S.quiz = novoQuiz(); go(cenaDe(m, "quiz")); };
   const h = $("btnHub"); if (h) h.onclick = () => go("hub");
-  $("btnAgain").onclick = () => iniciarMissao(1);
+  $("btnAgain").onclick = () => iniciarMissao(m);
 }
 
 /* ===================== Missão 0: juramento e aceite ===================== */
@@ -301,7 +381,7 @@ function renderAceite() {
 function iniciarMissao(n) {
   const m = MISSOES.find(x => x.n === n);
   if (!m || !m.inicio) return;
-  if (n === 1) { S.escolhas = []; S.quiz = { i: 0, ok: 0, answered: false, seq: 0 }; }
+  if (n > 0) { S.escolhas = []; S.quiz = novoQuiz(); }
   S.stage = { bg: "title" };
   go(m.inicio);
 }
@@ -316,7 +396,7 @@ function renderHub() {
     const livre = m.n === 1 ? PROG.m0 : PROG.passou(m.n - 1);   // a anterior foi vencida
     /* feita · aberta (jogável) · proxima (liberada, mas ainda não está neste pacote) · bloqueada */
     const estado = feita ? "feita" : livre ? (m.disponivel ? "aberta" : "proxima") : "bloqueada";
-    const pct = n => Math.round(n / QUIZ.length * 100);
+    const total = quizDe(m.n).length, pct = n => Math.round(n / total * 100);
     const status = { feita: `<p class="m-st ok">Concluída · nota ${pct(nota)}</p>`, aberta: `<p class="m-st">Liberada${nota !== null ? ` · melhor nota ${pct(nota)}` : ""}</p>`, proxima: `<p class="m-st">Liberada</p>`, bloqueada: "" }[estado];
     const acao = {
       feita: `<button class="secondary" data-m="${m.n}">Rever missão</button>`,
@@ -328,7 +408,7 @@ function renderHub() {
       <div class="m-arte">${dueloHTML(m)}<span class="m-ic">${ic(estado === "bloqueada" ? "cadeado" : m.icone)}</span>${feita ? `<b class="m-selo">Vencido</b>` : ""}</div>
       <div class="m-corpo"><p class="m-n">Missão ${m.n}</p><p class="m-t">${esc(m.titulo)}</p>
       <p class="m-d">${esc(m.tema)}${m.heroi ? ` · ${estado === "bloqueada" ? "herói secreto" : `com ${esc(m.heroi)}`}` : ""}</p>
-      ${status}${feita ? estrelasHTML(estrelas(nota)) : ""}<div class="m-acao">${acao}</div></div></article>`;
+      ${status}${feita ? estrelasHTML(estrelas(nota, total)) : ""}<div class="m-acao">${acao}</div></div></article>`;
   };
   const conqs = Object.entries(CONQUISTAS);
   $("panel").innerHTML = `
@@ -359,29 +439,67 @@ function markChapters(sc) {
   $("modName").textContent = m ? `· Missão ${m.n}: ${m.titulo}` : sc.type === "hub" ? "· Central de Missões" : "";
 }
 
+/* ===================== Pausa ===================== */
+/* Só nas páginas que têm o botão (missao2.html). Congela a fala, o avanço automático, a trilha, o cronômetro das decisões,
+   a câmera (animacao.js) e as animações CSS; a tela de pausa cobre o quadro até a pessoa voltar. */
+function pausar() {
+  if (S.pausado) return;
+  S.pausado = Date.now();
+  clearTimers();
+  try { VOZ.pause(); TRILHA.pause(); } catch (e) {}
+  $("frame").classList.add("pausado");
+  $("pausa").hidden = false;
+  $("btnContinuar").focus({ preventScroll: true });
+}
+function continuar() {
+  if (!S.pausado) return;
+  const parado = Date.now() - S.pausado;
+  S.pausado = 0;
+  for (const sh of $("art").children) if (sh._cam) sh._cam.t0 += parado;   // a câmera segue de onde parou
+  $("frame").classList.remove("pausado");
+  $("pausa").hidden = true;
+  bip();
+  const sc = SCENES[S.scene];
+  if (sc.type !== "lines") {
+    trilha(TRILHA_ALTA);
+    if (sc.timer) go(S.scene);   // decisão com tempo: recomeça a contagem
+    return;
+  }
+  const ln = sc.lines[S.li];
+  if (ln.depois && Object.entries(ln.depois).some(([k, v]) => S.stage[k] !== v)) later(() => { S.stage = { ...S.stage, ...ln.depois }; renderStage(); }, 600);
+  if (S.som && VOZ.src && !VOZ.error && !VOZ.ended) {
+    trilha(TRILHA_BAIXA);
+    const p = VOZ.play(); if (p && p.catch) p.catch(() => { if (S.auto) later(nextLine, 1500); });
+  } else {
+    if (S.som) trilha(TRILHA_BAIXA);
+    if (S.auto) later(nextLine, VOZ.ended ? 250 : lineMs(ln));
+  }
+}
+
 function restart() {
   S.escolhas = []; S.quiz = { i: 0, ok: 0, answered: false, seq: 0 }; S.stage = { bg: "title" };
   go("inicio");
 }
 
 /* ===================== Áudio: falas gravadas, trilha, efeitos e sons sintetizados ===================== */
-const VOZ_ARQ = { [N]: "narrador", [L]: "lupa", [I]: "isca", [F]: "forca-bruta", [C]: "comandante", [K]: "camaleao" };
+const VOZ_ARQ = { [N]: "narrador", [L]: "lupa", [I]: "isca", [F]: "forca-bruta", [C]: "comandante", [K]: "camaleao", [H]: "chave-mestra" };
 const VOZ = new Audio(); VOZ.preload = "auto";
 const TRILHA = new Audio(); TRILHA.loop = true; TRILHA.preload = "auto";
 const TRILHA_ALTA = .32, TRILHA_BAIXA = .05;
 let trilhaAlvo = TRILHA_ALTA, trilhaFade = null;
 /* a: nome do arquivo na fala (Missão 0); sem ele, <trecho>_<nn>_<voz>.mp3 */
 function arquivoFala(sid, i, ln) { return CONFIG.midia + "audio/" + (ln.a || `${sid}_${String(i + 1).padStart(2, "0")}_${VOZ_ARQ[ln.who]}.mp3`); }
-function falar(src, onend) {
+/* faltaMs: quanto esperar antes de seguir quando o arquivo não existe ou não toca */
+function falar(src, onend, faltaMs) {
   if (!S.som) return false;
   try {
     VOZ.pause(); VOZ.onended = null; VOZ.onerror = null;
     VOZ.src = src; VOZ.currentTime = 0;
     const tok = S.token;
     VOZ.onended = () => { if (tok === S.token && onend) onend(); };
-    VOZ.onerror = () => { if (tok === S.token && onend) later(onend, 1500); };
+    VOZ.onerror = () => { if (tok === S.token && onend) later(onend, faltaMs || 1500); };
     const p = VOZ.play();
-    if (p && p.catch) p.catch(() => { if (tok === S.token && onend) later(onend, 2500); });
+    if (p && p.catch) p.catch(() => { if (tok === S.token && onend) later(onend, faltaMs || 2500); });
     trilha(TRILHA_BAIXA);
     return true;
   } catch (e) { return false; }
@@ -433,6 +551,7 @@ function bip(tipo) {
     if (tipo === "sirene") { saida.gain.value = .07; for (let i = 0; i < 3; i++) { tom("sawtooth", 520, 880, i * .7, .35, .6); tom("sawtooth", 880, 520, i * .7 + .35, .35, .6); } }
     if (tipo === "glitch") { saida.gain.value = .12; ruido(0, .12, .6); tom("square", 140, 60, .05, .15, .4); ruido(.22, .08, .5); }
     if (tipo === "radio") { saida.gain.value = .08; ruido(0, .18, .8); tom("sine", 1400, 0, .02, .06, .4); }
+    if (tipo === "teclas") { saida.gain.value = .09; for (let i = 0; i < 14; i++) ruido(.25 + i * (.07 + (i % 3) * .015), .018, .8); }
     if (tipo === "erro") { saida.gain.value = .1; tom("square", 220, 160, 0, .3, .5); }
   } catch (e) {}
 }
@@ -465,8 +584,17 @@ $("stage").addEventListener("click", e => {
   if (e.target.closest(".screen > *")) return;
   if (SCENES[S.scene].type === "lines") nextLine();
 });
+if ($("btnPause")) {
+  $("btnPause").onclick = pausar;
+  $("btnContinuar").onclick = continuar;
+  document.addEventListener("keydown", e => {
+    if (e.target.closest("input, textarea")) return;
+    if (e.key === "p" || e.key === "P") { e.preventDefault(); S.pausado ? continuar() : pausar(); }
+    else if (S.pausado && e.key === "Escape") continuar();
+  });
+}
 document.addEventListener("keydown", e => {
-  if (e.target.closest("input, textarea, .opt, .hs, button")) return;
+  if (S.pausado || e.target.closest("input, textarea, .opt, .hs, button")) return;
   if (e.key === " " || e.key === "ArrowRight") {
     if (SCENES[S.scene].type === "lines") { e.preventDefault(); nextLine(); }
   }
@@ -487,6 +615,10 @@ $("btnRestart").onclick = restart;
 /* Painel de personalização */
 const JUMPS = [["M0 · Abertura", "m0a"], ["M0 · Vilões", "m0c"], ["M0 · Enquete", "m0d"], ["M0 · Esquadrão", "m0e"], ["M0 · Missões", "m0f"], ["M0 · Juramento", "m0g"], ["M0 · Alarme", "m0h"], ["Central", "hub"],
   ["M1 · Abertura", "t1"], ["Lição", "t3"], ["Desafio", "t4"], ["Virada", "t5"], ["Se eu cair", "t7"], ["Desfecho", "t8"], ["Quiz", "quiz"]];
+/* Na página de uma missão: todos os trechos dela, com o capítulo de cada um, e a Central */
+const jumps = FOCO === null ? JUMPS : [
+  ...Object.entries(SCENES).filter(([, sc]) => sc.m === FOCO).map(([id, sc]) => [`${(CAPS[FOCO] || [])[sc.cap - 1] || "Trecho"} · ${id}`, id]),
+  ["Central", "hub"]];
 function fillForm() {
   $("cfgEmpresa").value = CONFIG.empresa; $("cfgDominio").value = CONFIG.dominioOficial; $("cfgCor").value = CONFIG.corMarca;
   $("cfgCanal").value = CONFIG.canalReporte; $("cfgCanalDet").value = CONFIG.contatoAlternativo; $("cfgLogo").value = "";
@@ -494,11 +626,11 @@ function fillForm() {
 if (CONFIG.modoDemo) {
   $("btnCloseDrawer").onclick = () => { $("drawer").hidden = true; $("btnConfig").setAttribute("aria-expanded", "false"); };
   $("btnConfig").onclick = () => { const d = $("drawer"); d.hidden = !d.hidden; $("btnConfig").setAttribute("aria-expanded", String(!d.hidden)); };
-  $("jump").innerHTML = JUMPS.map(([l, id]) => `<button class="ghost" data-go="${id}">${l}</button>`).join("");
+  $("jump").innerHTML = jumps.map(([l, id]) => `<button class="ghost" data-go="${id}">${l}</button>`).join("");
   $("jump").onclick = e => {
     const b = e.target.closest("[data-go]"); if (!b) return;
     bip();
-    if (b.dataset.go === "quiz") S.quiz = { i: 0, ok: 0, answered: false, seq: 0 };
+    if (SCENES[b.dataset.go].type === "quiz") S.quiz = novoQuiz();
     go(b.dataset.go);
   };
   [["cfgEmpresa", "empresa"], ["cfgDominio", "dominioOficial"], ["cfgCor", "corMarca"], ["cfgCanal", "canalReporte"], ["cfgCanalDet", "contatoAlternativo"]].forEach(([id, k]) => {

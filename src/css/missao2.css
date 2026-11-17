@@ -1,0 +1,236 @@
+/* Esquadrão Sentinela · missao2.css
+   Telas da Missão 2 (A Força Bruta): criar senha, regras da chave, notificações de login no celular. Carregado só por missao2.html. */
+
+.who--chave { background: rgba(111,182,255,.16); color: #8cc4ff; }
+
+/* Primeiro acesso: endereço oficial (verde) e cursor piscando no campo vazio */
+.urlbar .url.url-ok { color: #17694f; }
+.field.cursor::after { content: ""; display: inline-block; width: .08em; height: 1.05em; vertical-align: -.15em; background: #1b2233; animation: piscaCursor 1s steps(2) infinite; }
+@keyframes piscaCursor { 50% { opacity: 0; } }
+
+/* As 4 regras da chave (tela cheia, por cima da Central) */
+.regras { left: 5%; right: 36%; font-size: 1.38cqw; }
+.regras-card { background: #fbfcfe; color: #1b2233; border-radius: .8cqw; padding: 1.1em 1.4em; box-shadow: 0 .8em 2.4em rgba(0,0,0,.35); overflow: hidden; }
+.regras-card .rg-k { margin: 0; font-size: .7em; letter-spacing: .12em; text-transform: uppercase; color: #66728c; }
+.regras-card h3 { margin: .1em 0 .55em; font-family: var(--f-display); font-size: 1.35em; }
+.regras-card ol { margin: 0; padding: 0; list-style: none; display: grid; gap: .45em; }
+.regras-card li { display: grid; grid-template-columns: 1.8em 1fr; gap: .6em; align-items: start; padding: .45em .6em; border-radius: .5em; opacity: .3; transition: opacity .3s, background .3s; }
+.regras-card li.on { opacity: 1; }
+.regras-card li.now { background: #e3f0ff; box-shadow: 0 0 0 .14em #6fb6ff; }
+.regras-card li b { display: block; }
+.regras-card li small { display: block; font-size: .78em; color: #4b5873; line-height: 1.35; }
+.regras-card .n { width: 1.8em; height: 1.8em; border-radius: 50%; display: grid; place-items: center; background: #6fb6ff; color: #0d1a33; font-weight: 800; }
+.regras .clue { border-color: #6fb6ff; }
+
+/* Celular à noite: tela de bloqueio com os pedidos de login empilhando */
+.ph-noite { background: linear-gradient(#18213a, #0b1020); color: #eef1f8; }
+.ph-relogio { padding: 1.1em .9em .4em; text-align: center; font-family: var(--f-display); font-weight: 800; font-size: 2.1em; line-height: 1; }
+.ph-relogio small { display: block; margin-top: .3em; font-family: var(--f-body, inherit); font-weight: 400; font-size: .32em; color: #9ba8c4; }
+.pushn { background: rgba(255,255,255,.12); border-radius: .9em; padding: .55em .7em; display: grid; gap: .15em; animation: pushEntra .45s cubic-bezier(.2,.9,.3,1.2) both; }
+.pushn p { margin: 0; }
+.pn-app { display: flex; justify-content: space-between; gap: .5em; font-size: .72em; color: #b9c4dc; }
+.pn-t { font-weight: 700; font-size: .92em; }
+.pn-d { font-size: .78em; color: #c9d2e6; }
+.pn-bts { display: grid; grid-template-columns: 1fr 1fr; gap: .4em; margin-top: .3em !important; }
+.pn-bts span { text-align: center; padding: .3em; border-radius: .5em; background: rgba(255,255,255,.14); font-size: .8em; font-weight: 700; }
+.pn-bts span:last-child { background: #2f6fdb; }
+.pushn.so { background: rgba(239,96,96,.22); }
+@keyframes pushEntra { from { opacity: 0; transform: translateY(-40%) scale(.96); } }
+.dec-tela .ph-noite { min-height: 260px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .field.cursor::after, .pushn { animation: none; }
+}
+
+/* ===================== Chave-Mestra: atuação de cada pose (.act-chave-<pose>) ===================== */
+/* Apontando: o braço "insiste" na direção (no lado direito do palco a pose vem espelhada e inclina para o outro lado) */
+.char .act.act-chave-aponta { animation: chPop .45s cubic-bezier(.3,1.5,.5,1) both, chAponta 2.6s ease-in-out .45s infinite; }
+.char.flip .act.act-chave-aponta { animation-name: chPop, chApontaE; }
+@keyframes chAponta { 50% { transform: rotate(1.1deg) translateX(.6%); } }
+@keyframes chApontaE { 50% { transform: rotate(-1.1deg) translateX(-.6%); } }
+/* Braços cruzados: confiante, acena devagar com o corpo */
+.char .act.act-chave-cruzado { animation: chPop .45s cubic-bezier(.3,1.5,.5,1) both, chAcena 3.6s ease-in-out .45s infinite; }
+@keyframes chAcena { 30% { transform: translateY(-.7%); } 60% { transform: translateY(.2%); } }
+/* Escudo: avança firme e segura a posição, com um tranco de impacto */
+.char .act.act-chave-escudo { animation: chEscudo .55s cubic-bezier(.3,1.6,.5,1) both, chFirme 2.4s ease-in-out .55s infinite; }
+@keyframes chEscudo { from { transform: translateX(-4%) scale(.96); } 60% { transform: translateX(1.5%) scale(1.02); } }
+@keyframes chFirme { 0%, 100% { transform: none; } 8% { transform: translateX(.8%); } 16% { transform: translateX(-.4%); } 24% { transform: none; } }
+/* Olhando o token: inclina para o pulso, como quem lê */
+.char .act.act-chave-token { animation: chPop .45s cubic-bezier(.3,1.5,.5,1) both, chLe 3s ease-in-out .45s infinite; }
+@keyframes chLe { 50% { transform: rotate(-1deg) translateY(.4%); } }
+/* Comemorando: pulinhos com o punho para cima */
+.char .act.act-chave-comemora { animation: chPop .4s cubic-bezier(.3,1.6,.5,1) both, chPula 1.1s cubic-bezier(.3,0,.4,1) .4s infinite; }
+@keyframes chPula { 0%, 55%, 100% { transform: none; } 25% { transform: translateY(-4.5%) scaleY(1.02); } 45% { transform: translateY(0) scaleY(.98); } }
+/* Pensativo: balança devagar, mão no queixo */
+.char .act.act-chave-pensa { animation: chPop .45s ease-out both, chPensa 4.4s ease-in-out .45s infinite; }
+@keyframes chPensa { 25% { transform: rotate(-.9deg); } 75% { transform: rotate(.9deg); } }
+@keyframes chPop { from { transform: translateY(1.5%) scale(.97); opacity: .4; } }
+
+/* ===================== Comunicador da Chave-Mestra ===================== */
+/* Sem expressão marcada, 3 bocas se alternam enquanto ele fala; com st.cara, a expressão fica parada */
+.r-chave .r-av { position: relative; border-color: #6fb6ff; }
+.r-chave .r-tx b { color: #8cc4ff; }
+.r-chave .ondas i { background: #6fb6ff; }
+.r-chave { border-color: #6fb6ff; }
+.r-av .r-bocas img, .r-av img.r-cara { position: absolute; max-width: none; margin: 0; }
+.r-av .r-bocas img { width: 150%; left: -25%; top: -26%; opacity: 0; animation: chBoca .42s linear infinite; }
+.r-av .r-bocas img:nth-child(2) { animation-delay: -.28s; }
+.r-av .r-bocas img:nth-child(3) { animation-delay: -.14s; }
+@keyframes chBoca { 0%, 32% { opacity: 1; } 33.3%, 100% { opacity: 0; } }
+.r-av img.r-cara { width: 160%; left: -30%; top: -11%; }
+
+@media (prefers-reduced-motion: reduce) {
+  [class*="act-chave-"] { animation: none !important; }
+  .r-av .r-bocas img { animation: none; }
+  .r-av .r-bocas img:first-child { opacity: 1; }
+}
+
+/* ===================== Fluidez ===================== */
+/* Corte digital para entrar e sair da sala escura: fatias deslocadas, flash vermelho, ~0,5 s (TRANSICOES_MISSAO em missao2.js) */
+.shot.enter-glitch { animation: glitchEntra .52s steps(1, end) both, glitchCor .52s ease-out both; }
+.shot.leave-glitch { animation: fadeOut .3s ease .22s both; }
+@keyframes glitchEntra {
+  0% { opacity: 0; clip-path: inset(42% 0 44% 0); translate: -3% 0; }
+  12% { opacity: 1; clip-path: inset(8% 0 62% 0); translate: 2.5% 0; }
+  26% { clip-path: inset(58% 0 6% 0); translate: -1.5% 0; }
+  40% { clip-path: inset(20% 0 30% 0); translate: 1% 0; }
+  55% { clip-path: inset(0 0 0 0); translate: -.4% 0; }
+  70%, 100% { clip-path: inset(0 0 0 0); translate: 0 0; }
+}
+@keyframes glitchCor { from { filter: saturate(2.2) brightness(1.7) hue-rotate(-25deg) contrast(1.2); } to { filter: none; } }
+
+/* Herói falando: o corpo acompanha o ritmo da fala (translate compõe com a respiração, que usa transform) */
+.char.falando img { animation: breathe 3.2s ease-in-out infinite, chFala 2.2s ease-in-out infinite; }
+@keyframes chFala {
+  0%, 100% { translate: 0 0; } 12% { translate: 0 -.45%; } 22% { translate: 0 0; } 34% { translate: 0 -.3%; }
+  48% { translate: 0 .1%; } 60% { translate: 0 -.55%; } 72% { translate: 0 0; } 86% { translate: 0 -.25%; }
+}
+
+/* Força Bruta falando: os olhos acendem no ritmo e a sala treme de leve */
+.stage[data-voz="forca-bruta"] .bf-eyes { animation: olhosFala .42s ease-in-out infinite alternate; }
+@keyframes olhosFala { from { opacity: .75; scale: 1; } to { opacity: 1; scale: 1.35; } }
+.stage[data-voz="forca-bruta"] .shot[data-palco="dark"] .cam { animation: salaTreme 1.1s ease-in-out infinite; }
+@keyframes salaTreme { 0%, 40%, 100% { translate: 0 0; } 8% { translate: .25% -.15%; } 16% { translate: -.22% .12%; } 24% { translate: .12% .06%; } }
+.stage[data-voz="forca-bruta"] .bf-term { text-shadow: 0 0 .5cqw rgba(255,80,80,.45); }
+
+/* Legenda entra subindo de leve a cada fala */
+.subs.entra { animation: legendaEntra .32s ease-out both; }
+@keyframes legendaEntra { from { opacity: 0; translate: 0 .35em; } }
+
+/* Celular vibra quando chegam pedidos de login */
+.onphone .ph-noite { animation: vibra .38s ease-in-out .25s 2; }
+@keyframes vibra { 0%, 100% { translate: 0 0; } 20% { translate: -1.2% 0; } 40% { translate: 1.2% 0; } 60% { translate: -.8% 0; } 80% { translate: .8% 0; } }
+
+/* Regra ou passo que acabou de acender: entra deslizando */
+.regras-card li.now, .steps-card li.on { animation: acende .45s cubic-bezier(.3,1.4,.5,1) both; }
+@keyframes acende { from { translate: -2% 0; opacity: .4; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .shot.enter-glitch, .shot.leave-glitch, .char.falando img, .stage[data-voz] .cam, .stage[data-voz] .bf-eyes, .subs.entra, .onphone .ph-noite, .regras-card li.now, .steps-card li.on { animation: none !important; }
+}
+
+/* ===================== Vida nos gestos da Chave-Mestra ===================== */
+/* Pontos medidos nos recortes (% do recorte). Ficam no .act, então acompanham a pose, o balanço e o espelhamento. */
+.char .act[class*="act-chave-"] { position: relative; }
+.char .act[class*="act-chave-"]::before, .char .act[class*="act-chave-"]::after { content: ""; position: absolute; pointer-events: none; translate: -50% -50%; mix-blend-mode: screen; z-index: 2; }
+/* Escudo erguido: o escudo acende em azul e pulsa */
+.act-chave-escudo::before { left: 76%; top: 42%; width: 70%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, rgba(140,200,255,.65) 0, rgba(90,160,255,.3) 38%, transparent 68%); animation: escudoBrilha 1.8s ease-in-out .5s infinite; }
+@keyframes escudoBrilha { 0%, 100% { opacity: .45; scale: .92; } 50% { opacity: 1; scale: 1.06; } }
+/* Olhando o token: as duas telas verdes piscam, como um código chegando */
+.act-chave-token::before, .act-chave-token::after { width: 30%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, rgba(120,255,190,.8) 0, rgba(60,230,150,.3) 35%, transparent 68%); animation: tokenPisca 1.4s ease-in-out infinite; }
+.act-chave-token::before { left: 27%; top: 42%; }
+.act-chave-token::after { left: 79%; top: 39%; animation-delay: -.7s; }
+@keyframes tokenPisca { 0%, 100% { opacity: .25; } 45%, 55% { opacity: 1; } }
+/* Apontando: brilho na ponta do dedo */
+.act-chave-aponta::after { left: 97%; top: 23%; width: 22%; aspect-ratio: 1; mix-blend-mode: normal; background: radial-gradient(circle, #fff 0 9%, #ffe08a 15%, rgba(255,200,80,.55) 28%, transparent 62%); clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%); filter: drop-shadow(0 0 .3cqw rgba(255,190,60,.9)); animation: brilhoDedo 1.5s ease-in-out .5s infinite; }
+@keyframes brilhoDedo { 0%, 100% { opacity: .35; scale: .55; rotate: 0deg; } 45% { opacity: 1; scale: 1.1; rotate: 45deg; } 75% { opacity: .55; scale: .7; rotate: 90deg; } }
+/* Comemorando: faíscas douradas saindo do punho */
+.act-chave-comemora::before, .act-chave-comemora::after { left: 86%; top: 6%; width: 62%; aspect-ratio: 1; border-radius: 50%; mix-blend-mode: normal;
+  background: radial-gradient(circle at 18% 30%, #ffd66b 0 5%, transparent 6.5%), radial-gradient(circle at 80% 20%, #fff3c4 0 4%, transparent 5.5%), radial-gradient(circle at 72% 80%, #ffd66b 0 5%, transparent 6.5%), radial-gradient(circle at 26% 76%, #fff3c4 0 4%, transparent 5.5%), radial-gradient(circle at 50% 6%, #ffe08a 0 4.5%, transparent 6%), radial-gradient(circle at 94% 52%, #ffd66b 0 4%, transparent 5.5%), radial-gradient(circle, rgba(255,214,107,.4) 0, transparent 40%);
+  filter: drop-shadow(0 0 .25cqw rgba(255,190,60,.9)); animation: faiscas 1.1s ease-out infinite; }
+.act-chave-comemora::after { rotate: 40deg; animation-delay: -.55s; }
+@keyframes faiscas { from { opacity: 1; scale: .3; } to { opacity: 0; scale: 1.25; } }
+
+/* ===================== Senha digitada letra a letra ===================== */
+.digita { display: inline-block; vertical-align: bottom; overflow: hidden; white-space: nowrap; width: 0; animation: digita calc(var(--n) * .075s) steps(var(--n), end) .25s forwards; }
+.digita::after { content: ""; }
+@keyframes digita { to { width: calc(var(--n) * 1ch); } }
+
+/* ===================== Contador de tentativas no terminal ===================== */
+@property --tent { syntax: "<integer>"; inherits: false; initial-value: 0; }
+.bf-term .bf-cont { margin-top: .4em; color: #ffb36b; width: auto; animation: contaTent 9s cubic-bezier(.3,0,.7,1) .4s forwards; counter-reset: tent var(--tent); }
+.bf-term .bf-cont::before { content: "tentativas: " counter(tent); }
+@keyframes contaTent { from { --tent: 0; } to { --tent: 48216730; } }
+
+/* ===================== Cenários próprios (FUNDOS.m2 em missao2.js): camadas no lugar do monitor, da caneca, do telão e dos olhos ===================== */
+.stage[data-fundo="bg_escritorio_m2"] .screen .mon { left: 58.9%; top: 43.2%; width: 27.3%; height: 28.7%; font-size: .69cqw; }
+.shot[data-bg="bg_escritorio_m2.jpg"] .steam { left: 53.2% !important; top: 63%; }
+.shot[data-bg="bg_central_m2.jpg"] .central-amb .scan { left: 4.5%; top: 12.4%; width: 58.5%; height: 56.6%; }   /* telão da esquerda (cenário v2) */
+.shot[data-bg="bg_central_m2.jpg"] .shield-glow { left: 33.1%; top: 40.4%; width: 12cqw; height: 12cqw; margin: -6cqw 0 0 -6cqw; background: radial-gradient(circle, rgba(111,182,255,.3), transparent 65%); }
+.shot[data-bg="bg_central_m2.jpg"] .strip { display: none; }
+.shot[data-bg="bg_sala_m2.jpg"] .bf-eyes { display: none; }   /* a silhueta gigante foi apagada do fundo: a Força Bruta entra como recorte */
+/* Sala da Força Bruta (cenario_sala_m2_v2): o monitor da mesa é pequeno, então o terminal salta dele como um balão de quadrinho
+   (a ponta aponta para a tela do monitor, em 77,7–87,8% × 42–59%) e a tela de verdade só acende em verde */
+.shot[data-bg="bg_sala_m2.jpg"] .bf-term { left: 64%; top: 13%; width: 29%; height: 25%; padding: .9cqw 1.1cqw; overflow: visible; background: #040b08; border: .22cqw solid #3fdc8a; border-radius: .5cqw; box-shadow: 0 0 1.6cqw rgba(63,220,138,.35), .4cqw .5cqw 0 rgba(0,0,0,.6); rotate: 1.5deg; animation: pop .3s ease-out both; }
+.shot[data-bg="bg_sala_m2.jpg"] .bf-term::after { content: ""; position: absolute; left: 58%; top: 100%; width: 2.6cqw; height: 4.4cqw; background: #3fdc8a; clip-path: polygon(0 0, 100% 0, 75% 100%); }
+.shot[data-bg="bg_sala_m2.jpg"] .dark-amb::after { content: ""; position: absolute; left: 77.7%; top: 42.2%; width: 10.1%; height: 16.5%; border-radius: 12%; background: radial-gradient(ellipse, rgba(63,220,138,.32), rgba(63,220,138,.08) 70%); mix-blend-mode: screen; animation: glowPulse 2.6s ease-in-out infinite; }
+.shot[data-bg="bg_sala_m2.jpg"] .fb-racha { left: 83%; top: 11%; width: 9cqw; }   /* no canto do balão, sem tapar o texto */
+
+/* ===================== Força Bruta em cena (HEROIS.forca em missao2.js) ===================== */
+/* Atuação por pose: o recorte ganha um movimento curto que combina com o gesto */
+.char .act.act-forca-aquece { animation: chPop .45s cubic-bezier(.3,1.5,.5,1) both, fbAperta 1.6s ease-in-out .45s infinite; }
+.char .act.act-forca-soco { animation: fbSoco .55s cubic-bezier(.2,.9,.3,1.2) both; }
+.char .act.act-forca-insiste { animation: chPop .3s ease-out both, fbMartela .48s cubic-bezier(.5,0,.7,1) .3s infinite; }
+.char .act.act-forca-comemora { animation: chPop .4s cubic-bezier(.3,1.5,.5,1) both, fbPula .7s ease-in-out .4s infinite alternate; }
+.char .act.act-forca-furiosa { animation: chPop .25s ease-out both, fbTreme .12s linear .25s 8; }
+.char .act.act-forca-reverencia { transform-origin: 50% 100%; animation: fbReverencia 1.4s cubic-bezier(.3,1.2,.5,1) both; }
+.char .act.act-forca-le, .char .act.act-forca-ameaca { animation: chPop .45s cubic-bezier(.3,1.5,.5,1) both; }
+@keyframes fbAperta { 50% { scale: 1.015 .99; } }
+@keyframes fbSoco { 0% { translate: 4% 0; } 45% { translate: -5% 0; } 100% { translate: 0 0; } }
+@keyframes fbMartela { 0%, 100% { translate: 0 0; } 40% { translate: 0 -2.5%; } 55% { translate: 0 1%; } }
+@keyframes fbPula { to { translate: 0 -2%; } }
+@keyframes fbTreme { 25% { translate: -.8% 0; } 75% { translate: .8% 0; } }
+@keyframes fbReverencia { 0% { rotate: 0deg; } 40% { rotate: -4deg; } 100% { rotate: 0deg; } }
+
+/* Close de quadrinho: só aparece enquanto ela fala */
+.fb-close { position: absolute; left: 3%; top: 12%; width: 13.5cqw; padding: .4cqw .4cqw .3cqw; background: #170708; border: .22cqw solid #ff3b3b; border-radius: .4cqw; box-shadow: 0 0 1.8cqw rgba(255,40,40,.5), .4cqw .5cqw 0 rgba(0,0,0,.6); rotate: -2.5deg; opacity: 0; scale: .7; transition: opacity .2s, scale .3s cubic-bezier(.3,1.6,.5,1); pointer-events: none; }
+.stage[data-voz="forca-bruta"] .fb-close { opacity: 1; scale: 1; }
+.fb-rosto { position: relative; display: block; aspect-ratio: 115 / 134; overflow: hidden; border-radius: .2cqw; background: radial-gradient(circle at 50% 40%, #5a1418, #1a0507 75%); }
+.fb-rosto img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.fb-rosto::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(255,60,60,.08) 0 .15cqw, transparent .15cqw .45cqw); mix-blend-mode: screen; }
+.fb-bocas img { opacity: 0; animation: chBoca .42s linear infinite; }
+.fb-bocas img:nth-child(2) { animation-delay: -.28s; }
+.fb-bocas img:nth-child(3) { animation-delay: -.14s; }
+.fb-close b { display: block; margin-top: .25cqw; font-family: var(--f-display); font-size: 1.05cqw; letter-spacing: .12em; text-transform: uppercase; text-align: center; color: #ff5a5a; }
+
+/* Soco no "Achei!": estouro, faíscas e teclas voando a partir do punho */
+.fb-soco { position: absolute; left: 36%; top: 44%; width: 0; height: 0; pointer-events: none; }
+.fb-soco img { position: absolute; left: 0; top: 0; translate: -50% -50%; }
+.fb-estouro { width: 9cqw; animation: fbEstouro .6s cubic-bezier(.2,1.4,.4,1) .15s both; }
+.fb-faiscas { width: 7cqw; animation: fbFaisca .9s ease-out .2s both; }
+.fb-tecla { width: 2.3cqw; animation: fbTecla 1.2s cubic-bezier(.15,.7,.35,1) .2s both; }
+@keyframes fbEstouro { 0% { scale: .1; opacity: 0; } 30% { scale: 1.25; opacity: 1; } 100% { scale: 1; opacity: .9; } }
+@keyframes fbFaisca { 0% { scale: .3; opacity: 0; } 25% { opacity: 1; } 100% { scale: 1.5; opacity: 0; } }
+@keyframes fbTecla { 0% { transform: none; opacity: 0; } 10% { opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) rotate(var(--r)); opacity: 0; } }
+
+/* "Negado?!": o monitor dela trinca (rachadura preta invertida para aparecer na tela escura) */
+.fb-racha { position: absolute; left: 76%; top: 34%; width: 12cqw; filter: invert(1) drop-shadow(0 0 .3cqw rgba(255,90,90,.8)); opacity: .85; animation: fbRacha .35s cubic-bezier(.2,1.5,.4,1) .4s both; pointer-events: none; }
+@keyframes fbRacha { from { scale: .3; opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .char .act[class*="act-forca-"], .fb-soco img, .fb-racha { animation: none !important; }
+  .fb-close { transition: none; }
+  .fb-bocas img { animation: none; }
+  .fb-bocas img:first-child { opacity: 1; }
+}
+
+/* ===================== Impacto: tranco de câmera nas falas fortes da Força Bruta ===================== */
+.art.impacto { animation: impacto .6s cubic-bezier(.2,.9,.3,1) both; }
+@keyframes impacto { 0% { scale: 1; translate: 0 0; } 18% { scale: 1.07; translate: .4% -.3%; } 32% { translate: -.35% .25%; } 46% { translate: .2% -.1%; } 100% { scale: 1; translate: 0 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .char .act[class*="act-chave-"]::before, .char .act[class*="act-chave-"]::after { animation: none; opacity: .6; }
+  .digita { animation: none; width: auto; }
+  .bf-term .bf-cont { animation: none; }
+  .art.impacto { animation: none; }
+}

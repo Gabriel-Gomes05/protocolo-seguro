@@ -23,3 +23,6 @@ http.createServer(async (req, res) => {
     res.writeHead(404); res.end("Não encontrado");
   }
 }).listen(PORTA, () => console.log(`Esquadrão Sentinela rodando em http://localhost:${PORTA}/src/`));
+
+/* Servidor de desenvolvimento: um erro inesperado (ex.: conexão cortada no meio) fica registrado no terminal em vez de derrubar o servidor */
+process.on("uncaughtException", e => console.error(`[${new Date().toLocaleTimeString()}] erro no servidor (continua no ar):`, e && e.stack || e));

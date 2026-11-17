@@ -26,6 +26,8 @@ const CAMERAS = {
   m0_O9:   { o: [55, 38], z: [1.01, 1.06], T: 7 },  // alarme
   bg_comando: { o: [50, 45], z: [1, 1.05], T: 30 }  // salão vazio: fundo da Central de Missões
 };
+/* Câmeras dos cenários próprios de uma missão (CAMERAS_MISSAO = { bg_sala_m2: {…} }, definido em missaoN.js, junto com FUNDOS) */
+const CAMERAS_PROPRIAS = typeof CAMERAS_MISSAO === "object" ? CAMERAS_MISSAO : {};
 /* Entradas em corte seco (o susto do Camaleão e o alarme): sem transição, com tremor */
 const CORTE_SECO = new Set(["m0_O5", "m0_O9"]);
 /* Quadros: cada imagem ganha um ponto de aproximação diferente (fixo pelo nome), para a câmera não repetir sempre o mesmo movimento */
@@ -48,6 +50,8 @@ function camTransform(c, agora) {
   return tr;
 }
 function cameraLoop(agora) {
+  /* pausa: congela a câmera (continuar() compensa o tempo parado). typeof: o primeiro quadro pode vir antes de player.js definir S */
+  if (typeof S === "undefined" || S.pausado) return requestAnimationFrame(cameraLoop);
   let ultima = null;
   for (const sh of $("art").children) if (sh._cam) { ultima = sh._cam; sh.firstElementChild.style.transform = camTransform(ultima, agora); }
   const scr = $("screen");
@@ -59,9 +63,12 @@ function cameraLoop(agora) {
 }
 
 /* ===================== Planos e transições ===================== */
-const TRANSICAO_MS = { fade: 750, wipe: 700, dip: 1350, cut: 0 };
+const TRANSICAO_MS = { fade: 750, wipe: 700, dip: 1350, cut: 0, glitch: 520 };
+/* Uma missão pode trocar a transição entre dois cenários (TRANSICOES_MISSAO = { "office>dark": "glitch" }, definido em missaoN.js) */
+const TRANSICOES_PAR = typeof TRANSICOES_MISSAO === "object" ? TRANSICOES_MISSAO : {};
 function tipoTransicao(de, para) {
   if (!de) return "fade";                                                       // abertura: entra direto
+  if (TRANSICOES_PAR[de + ">" + para]) return TRANSICOES_PAR[de + ">" + para];   // transição própria da missão
   if (de === "title" || de === "dark" || para === "dark") return "dip";       // pelo preto
   if (de === "roof" || para === "roof") return "wipe";                          // corte para o covil da Isca
   return "fade";
@@ -73,6 +80,7 @@ function montarCena(p) {
   const art = $("art");
   const tpl = document.createElement("template");
   tpl.innerHTML = p.layers;
+  $("stage").dataset.fundo = p.bg.replace(/\.jpg$/, "");   // telas fora da câmera (monitor) se ajustam ao cenário
   const atual = art.lastElementChild && art.lastElementChild._cam ? art.lastElementChild : null;
   if (atual && atual.dataset.bg === p.bg) trocarCamadas(atual.firstElementChild, tpl.content);
   else novoPlano(art, atual, p, tpl.content);
@@ -83,7 +91,7 @@ function novoPlano(art, antigo, p, camadas) {
   shot.className = "shot";
   shot.dataset.bg = p.bg;
   shot.dataset.palco = p.palco;
-  const cfg = CAMERAS[p.cam] || (p.palco === "quadro" ? camQuadro(p.cam) : CAMERAS.office);
+  const cfg = CAMERAS[p.cam] || CAMERAS_PROPRIAS[p.cam] || (p.palco === "quadro" ? camQuadro(p.cam) : CAMERAS[p.palco] || CAMERAS.office);
   /* mesma câmera (ex.: cena02 → cena03): continua o movimento de onde estava, sem salto */
   const t0 = antigo && antigo._camKey === p.cam ? antigo._cam.t0 : performance.now();
   shot._cam = { ...cfg, t0 }; shot._camKey = p.cam;
@@ -107,6 +115,7 @@ function novoPlano(art, antigo, p, camadas) {
   const iniciar = () => {
     if (!shot.isConnected) return;
     shot.classList.replace("pending", "enter-" + tipo);
+    if (tipo === "glitch") bip("glitch");
     if (antigo && antigo.isConnected) {
       antigo.classList.add("leave-" + tipo);
       setTimeout(() => antigo.remove(), TRANSICAO_MS[tipo]);
@@ -120,7 +129,8 @@ function novoPlano(art, antigo, p, camadas) {
 /* Pré-carrega fundos e recortes para as trocas de cena não esperarem a rede */
 function preCarregarImagens() {
   const nomes = ["cena01.jpg", "cena02.jpg", "cena03.jpg", "bg_escritorio.jpg", "bg_telhado.jpg", "bg_central.jpg", "bg_celular.jpg", "bg_sala.jpg",
-    "lupa_frente.png", "lupa_tresquartos.png", ...Object.keys(ISCA_POSE).map(p => `isca_${p}.png`), ...[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `m0_O${n}.jpg`), "bg_comando.jpg"];
+    "lupa_frente.png", "lupa_tresquartos.png", ...Object.keys(ISCA_POSE).map(p => `isca_${p}.png`), ...[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `m0_O${n}.jpg`), "bg_comando.jpg",
+    ...(typeof IMAGENS_MISSAO === "object" ? IMAGENS_MISSAO : [])];   // recortes e fundos da missão desta página (missaoN.js)
   preCarregarImagens.cache = nomes.map(n => { const i = new Image(); i.src = IMG(n); return i; });
 }
 

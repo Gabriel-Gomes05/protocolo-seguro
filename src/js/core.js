@@ -6,7 +6,8 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const slug = () => CONFIG.empresa.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "") || "empresa";
 const iniciais = () => CONFIG.empresa.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase() || "E";
-const fmt = t => String(t).split("{EMPRESA}").join(CONFIG.empresa).split("{slug}").join(slug()).split("{dominio}").join(CONFIG.dominioOficial);
+/* {Slug}: o slug com inicial maiúscula (ex.: senha no padrão "Empresaexemplo2026!") */
+const fmt = t => String(t).split("{EMPRESA}").join(CONFIG.empresa).split("{slug}").join(slug()).split("{Slug}").join(slug().replace(/^./, c => c.toUpperCase())).split("{dominio}").join(CONFIG.dominioOficial);
 const reduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /* ===================== SCORM 1.2 ===================== */

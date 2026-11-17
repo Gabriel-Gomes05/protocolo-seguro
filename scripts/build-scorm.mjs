@@ -21,6 +21,8 @@ await rm(join(RAIZ, "dist"), { recursive: true, force: true });
 await mkdir(SAIDA, { recursive: true });
 await cp(join(RAIZ, "src"), SAIDA, { recursive: true });
 await cp(join(RAIZ, "assets"), join(SAIDA, "assets"), { recursive: true });
+// As páginas de desenvolvimento por missão (missao0.html, missao1.html…) não vão para o cliente
+for (const nome of await readdir(SAIDA)) if (/^missao\d+\.html$/.test(nome)) await rm(join(SAIDA, nome));
 
 // Configuração do pacote do cliente: mídia dentro do pacote e sem o painel de demonstração
 const cfgPath = join(SAIDA, "js", "config.js");

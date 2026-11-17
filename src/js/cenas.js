@@ -7,8 +7,8 @@ const IMG = n => CONFIG.midia + "img/" + n;
 /* Posição dos personagens recortados: [centro X %, base %, altura %] */
 const ISCA_POSE = { lancar: [30, 26, 48], fisgou: [30, 26, 54], tramando: [28, 26, 56], irritado: [28, 26, 56], caido: [30, 24, 44], rede: [28, 26, 56], mao: [28, 26, 56] };
 /* side: de onde o personagem entra quando aparece no meio de um cenário; act: atuação da pose (player.css, .act-*) */
-function charHTML(k, file, [x, y, h], { cls = "", side = "left", act = "" } = {}) {
-  return `<div class="char ${cls}" data-k="${k}" data-side="${side}" style="left:${x}%;bottom:${y}%;height:${h}%"><div class="ctr"><div class="act${act ? " act-" + act : ""}"><img src="${IMG(file)}" alt=""></div></div></div>`;
+function charHTML(k, file, [x, y, h], { cls = "", side = "left", act = "", flip = false } = {}) {
+  return `<div class="char ${cls}${flip ? " flip" : ""}" data-k="${k}" data-side="${side}" style="left:${x}%;bottom:${y}%;height:${h}%"><div class="ctr"><div class="act${act ? " act-" + act : ""}"><img src="${IMG(file)}" alt=""></div></div></div>`;
 }
 function signHTML() {
   return `<div class="sign" data-k="sign" style="background:${esc(CONFIG.corMarca)}"><span>${esc(CONFIG.empresa)}</span></div>`;
@@ -35,10 +35,45 @@ function centralHTML() {
   return `<div class="central-amb" data-k="amb"><div class="scan"><i></i></div><b class="shield-glow"></b>
     <i class="strip" style="left:88.5%;top:31.2%;width:11.5%"></i><i class="strip" style="left:88.5%;top:45.3%;width:11.5%;animation-delay:1.1s"></i><i class="strip" style="left:0;top:30.2%;width:9.6%;animation-delay:.6s"></i></div>`;
 }
-function darkHTML() {
+/* Terminal da Força Bruta na sala escura (st.term). Cada linha: [texto, "x" falhou | "v" acertou | "" só texto];
+   fim: a linha final piscando (bom: true quando é boa notícia, em verde); contador: true mostra as tentativas correndo. Até ~26 caracteres por linha. Outras missões acrescentam terminais. */
+const TERMINAIS = {
+  ataque: { linhas: [["123456", "x"], ["senha123", "x"], ["{slug}2026", "v"]], fim: "ACESSO LIBERADO" }
+};
+function darkHTML(st) {
   const dust = [[14, 44], [22, 58], [31, 38], [38, 52], [26, 30], [45, 40], [18, 66], [34, 62]];
+  const tm = TERMINAIS[st.term] || TERMINAIS.ataque, marca = { x: " <s>✗</s>", v: " <u>✓</u>" };
+  const linhas = tm.linhas.map(([t, m], i) => `<p style="animation-delay:${.9 + i}s">&gt; ${esc(fmt(t))}${marca[m] || ""}</p>`).join("");
+  const fim = tm.fim ? `<p class="ok${tm.bom ? " bom" : ""}" style="animation-delay:${tm.linhas.length + .8}s">${esc(tm.fim)}</p>` : "";
   return `<div class="dark-amb" data-k="amb">${dust.map(([x, y], i) => `<i class="mote" style="left:${x}%;top:${y}%;animation-delay:-${i * 1.3}s"></i>`).join("")}<b class="bf-eyes"></b></div>
-    <div class="bf-term" data-k="term"><p style="animation-delay:.9s">&gt; 123456 <s>✗</s></p><p style="animation-delay:1.9s">&gt; senha123 <s>✗</s></p><p style="animation-delay:2.9s">&gt; ${esc(slug())}2026 <u>✓</u></p><p class="ok" style="animation-delay:3.8s">ACESSO LIBERADO</p></div>`;
+    <div class="bf-term" data-k="term-${esc(st.term || "ataque")}">${linhas}${fim}${tm.contador ? `<p class="bf-cont" style="animation-delay:.4s"></p>` : ""}</div>`;
+}
+/* Herói em cena (st.heroi). Com recortes próprios (poses: por cenário, [arquivo, [centro X %, base %, altura %], lado de entrada]),
+   entra como personagem; sem eles, aparece como holograma recortado da arte de duelo
+   (corte: [esquerda, topo, largura, altura] em % da arte quadrada · lado: em que canto fica por cenário) */
+const HEROIS = {
+  lupa: { nome: "Lupa", sub: "comunicador · canal seguro", avatar: () => `<img src="${IMG("lupa_frente.png")}" alt="">` }
+};
+function heroiHTML(k, bg, st = {}) {
+  const h = HEROIS[k]; if (!h) return "";
+  if (h.poses) {
+    const p = h.poses[bg] || h.poses.padrao;
+    if (!p) return "";
+    /* st.heroiPose: pose da folha de poses (arquivo h.arquivoPose(pose)), com atuação própria (.act-<k>-<pose>).
+       No lado direito do palco, as poses com direção (h.virar) são espelhadas para apontar para o centro.
+       ancora: onde fica o corpo na largura do recorte (0 a 1) e a proporção largura/altura, para o corpo não pular de lugar. */
+    const pose = st.heroiPose, [x, y, alt] = p[1];
+    if (!pose) return charHTML("heroi-" + k, p[0], p[1], { cls: "heroi " + k, side: p[2] || "right" });
+    /* escala: altura do recorte em relação à pose de pé (braços erguidos deixam o recorte mais alto), para o corpo não encolher */
+    const flip = x > 50 && (h.virar || []).includes(pose), [anc, prop] = (h.ancora && h.ancora[pose]) || [.5, 0];
+    const altPose = alt * ((h.escala && h.escala[pose]) || 1), largura = altPose * 9 / 16 * prop, dx = (flip ? anc - .5 : .5 - anc) * largura;
+    return charHTML("heroi-" + k, h.arquivoPose(pose), [x + dx, y, altPose], { cls: "heroi " + k, side: p[2] || "right", act: `${k}-${pose}`, flip });
+  }
+  if (!h.corte) return "";
+  const [x, y, w, a] = h.corte, lado = (h.lado && h.lado[bg]) || "dir";
+  return `<div class="holo-arte ${lado}" data-k="heroi-${k}" style="aspect-ratio:${w}/${a}">
+    <div class="ha-crop"><img src="${IMG(h.arte)}" alt="" style="width:${(10000 / w).toFixed(2)}%;left:${(-x / w * 100).toFixed(2)}%;top:${(-y / a * 100).toFixed(2)}%"></div>
+    <i class="ha-linhas"></i><p class="ha-placa">${esc(h.nome)}</p></div>`;
 }
 
 /* Efeitos do telhado. O SVG usa a mesma proporção do palco (16:9), então as coordenadas não distorcem. */
@@ -150,9 +185,10 @@ function alarmeHTML() {
     <div class="sirene" data-k="sirene1" style="left:24.5%"><i></i></div><div class="sirene" data-k="sirene2" style="left:76%"><i style="animation-delay:-.7s"></i></div>
     <div class="alert-banner m0" data-k="banner">ALERTA · ATIVIDADE SUSPEITA NO SETOR DE E-MAILS</div><div class="tremor" data-k="tremor"></div>`;
 }
-/* Comunicador: a Lupa fala de campo, pelo rádio (lado: "esq" ou "dir") */
-function radioHTML(lado) {
-  return `<div class="radio ${lado}" data-k="radio"><span class="r-av"><img src="${IMG("lupa_frente.png")}" alt=""></span><span class="r-tx"><b>Lupa</b><small>comunicador · canal seguro</small><span class="ondas">${"<i></i>".repeat(9)}</span></span></div>`;
+/* Comunicador: um herói fala de campo, pelo rádio (lado: "esq" ou "dir"; heroi: chave de HEROIS, a Lupa por padrão) */
+function radioHTML(lado, heroi = "lupa", st = {}) {
+  const h = HEROIS[heroi] || HEROIS.lupa;
+  return `<div class="radio ${lado} r-${heroi}" data-k="radio"><span class="r-av">${h.avatar(st)}</span><span class="r-tx"><b>${esc(h.nome)}</b><small>${esc(h.sub)}</small><span class="ondas">${"<i></i>".repeat(9)}</span></span></div>`;
 }
 
 /* Ícones (missões, conquistas, patentes): traço simples na cor do texto */
@@ -178,6 +214,9 @@ const ic = n => `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke=
 const QUADROS_PRONTOS = new Set(["cena06", "cena07", "q_t1_01", "q_t1_04", "q_t1_05", "q_t1_06", "q_t2a_02", "q_t2a_04", "q_t2b_04"]);
 /* Fala com quadro: a imagem ocupa a cena inteira e as telas sobrepostas somem */
 const quadroAtivo = st => (st.bg !== "m0" && st.quadro && QUADROS_PRONTOS.has(st.quadro) && st.quadro) || null;
+/* Cenários próprios de uma missão (missaoN.js): FUNDOS.m2 = { office: "bg_escritorio_m2.jpg" }, escolhidos por st.fundos = "m2".
+   A câmera passa a ser o nome do arquivo (CAMERAS_MISSAO em missaoN.js); as camadas se ajustam pelo data-fundo do palco. */
+const FUNDOS = {};
 function sceneParts(st) {
   const quadro = quadroAtivo(st);
   if (quadro) return { bg: "quadros/" + quadro + ".jpg", cam: "q:" + quadro, palco: "quadro", layers: "" };
@@ -218,9 +257,19 @@ function sceneParts(st) {
       break;
     case "dark":
       bg = "bg_sala.jpg"; cam = "dark";
-      layers = darkHTML();
+      layers = darkHTML(st);
       break;
   }
+  const proprio = st.fundos && FUNDOS[st.fundos] && FUNDOS[st.fundos][st.bg];
+  if (proprio) { bg = proprio; cam = proprio.replace(/\.jpg$/, ""); }
+  /* Herói em holograma e comunicador (Missão 2 em diante; a Missão 1 usa os recortes da Lupa acima) */
+  if (st.heroi) layers += heroiHTML(st.heroi, st.bg, st);
+  /* Vilão em cena (st.vilao, pose em st.vilaoPose): mesmo esquema de recortes do herói; extra(st) traz camadas próprias (close, efeitos) */
+  if (st.vilao && HEROIS[st.vilao]) {
+    const v = HEROIS[st.vilao];
+    layers += heroiHTML(st.vilao, st.bg, { ...st, heroiPose: st.vilaoPose }) + (v.extra ? v.extra(st) : "");
+  }
+  if (st.com) layers += radioHTML(st.com, st.radioHeroi, st);
   return { bg, cam, palco: st.bg, layers };
 }
 
@@ -346,3 +395,5 @@ function logoHTML() {
 
 const BADGE_RECRUTA = `<svg viewBox="0 0 200 230" aria-hidden="true"><path d="M100 8 L186 40 L178 130 Q160 190 100 222 Q40 190 22 130 L14 40 Z" fill="#92b4ea" stroke="#fff3d6" stroke-width="6"/><path d="M100 52 l14 30 33 4 -24 23 6 33 -29 -16 -29 16 6 -33 -24 -23 33 -4z" fill="#f2a93b" stroke="#281904" stroke-width="5" stroke-linejoin="round"/><text x="100" y="196" text-anchor="middle" font-family="Bricolage Grotesque, Trebuchet MS, sans-serif" font-size="21" font-weight="800" fill="#0d1322">RECRUTA</text></svg>`;
 const BADGE_SVG =`<svg viewBox="0 0 200 230" aria-hidden="true"><defs><clipPath id="badgeClip"><path d="M100 8 L186 40 L178 130 Q160 190 100 222 Q40 190 22 130 L14 40 Z"/></clipPath><linearGradient id="badgeShine" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><path d="M100 8 L186 40 L178 130 Q160 190 100 222 Q40 190 22 130 L14 40 Z" fill="#f2a93b" stroke="#fff3d6" stroke-width="6"/><circle cx="92" cy="100" r="34" fill="none" stroke="#281904" stroke-width="12"/><line x1="116" y1="124" x2="146" y2="156" stroke="#281904" stroke-width="14" stroke-linecap="round"/><text x="100" y="198" text-anchor="middle" font-family="Bricolage Grotesque, Trebuchet MS, sans-serif" font-size="22" font-weight="800" fill="#281904">LUPA</text><g clip-path="url(#badgeClip)"><g transform="rotate(20 100 115)"><rect class="shine" x="-90" y="-20" width="70" height="280" fill="url(#badgeShine)"/></g></g></svg>`;
+/* Insígnia que gira no efeito "badge", por missão (st.insignia). Outras missões acrescentam a sua. */
+const INSIGNIAS = { lupa: BADGE_SVG };

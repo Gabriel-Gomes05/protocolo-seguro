@@ -32,7 +32,7 @@ const CONQUISTAS = {
 /* XP de cada ação. Cada ganho tem uma chave e só conta uma vez (rever a missão não acumula XP de novo). */
 const XP = { promessa: 30, m0: 50, pista: 25, pistasPerfeitas: 50, reflexo: 40, quiz: 40, sequencia: 20, aprovado: 150 };
 
-const N = "NARRADOR", L = "LUPA", I = "ISCA", F = "FORÇA BRUTA", C = "COMANDANTE", K = "CAMALEÃO";
+const N = "NARRADOR", L = "LUPA", I = "ISCA", F = "FORÇA BRUTA", C = "COMANDANTE", K = "CAMALEÃO", H = "CHAVE-MESTRA";
 
 /* ===================== Missão 0 · O Recrutamento ===================== */
 /* Juramento: os três compromissos do recruta */
@@ -223,3 +223,9 @@ const QUIZ = [
     o: ["Apagar o e-mail e torcer para nada acontecer", "Avisar o TI imediatamente e trocar a senha", "Esperar para ver se aparece algo estranho"], c: 1,
     e: "Minutos contam. Avisar rápido transforma um desastre num susto." }
 ];
+
+/* Quiz e fecho de cada missão (renderQuiz, renderEnd). Outras missões acrescentam a sua entrada (ex.: missao2.js). */
+const QUIZZES = { 1: QUIZ };
+const FINAIS = {
+  1: { insignia: "lupa", gabarito: "gabarito", ganhou: "Insígnia da Lupa conquistada. Você já enxerga a isca antes de morder.", dica: "as explicações da Lupa ajudam." }
+};
